@@ -33,6 +33,7 @@ public class PostProcessorPdfComponent {
                 PdfStamper stamper = new PdfStamper(reader, pdfWithFooterStream);
         ) {
             System.out.println(reader.getNumberOfPages());
+            System.out.println(reader.getPageSize(1));
 
             BaseFont baseFont = BaseFont.createFont(BaseFont.HELVETICA, BaseFont.WINANSI, BaseFont.NOT_EMBEDDED);
             var document = Jsoup.parse(footer).getElementsByTag("footer").get(0);
@@ -71,6 +72,9 @@ public class PostProcessorPdfComponent {
 
                 }
             }
+
+            stamper.close();
+            reader.close();
 
             return pdfWithFooterStream.toByteArray();
         } catch (IOException e) {

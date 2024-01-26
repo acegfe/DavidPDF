@@ -26,6 +26,16 @@ import static java.util.Optional.ofNullable;
 @Component
 public class PdfRenderComponentImpl implements PdfRenderComponent {
 
+    @SneakyThrows
+    @Override
+    public String render(String data, RenderType renderType, ByteArrayOutputStream byteArrayOutputStream) {
+        var footer = findFooterByTag(data, renderType);
+        var cleanData = cleanUpFooter(data, renderType);
+
+        byteArrayOutputStream.write(renderPdf(cleanData, PdfRenderComponent.createRemoteDriver(Constants.getWebDriverPath()), RenderType.TYPE_DATA));
+
+        return footer;
+    }
 
     private String findFooterByTag(String data, RenderType renderType) {
         Document document = renderType.getJsoupDocument(data);
@@ -56,16 +66,7 @@ public class PdfRenderComponentImpl implements PdfRenderComponent {
         return getDecoder().decode(pdf.getContent());
     }
 
-    @SneakyThrows
-    @Override
-    public String render(String data, RenderType renderType, ByteArrayOutputStream byteArrayOutputStream) {
-        var footer = findFooterByTag(data, renderType);
-        var cleanData = cleanUpFooter(data, renderType);
 
-        byteArrayOutputStream.write(renderPdf(cleanData, PdfRenderComponent.createRemoteDriver(Constants.getWebDriverPath()), RenderType.TYPE_DATA));
-
-        return footer;
-    }
 
     private String cleanUpFooter(String data, RenderType renderType) {
         Document document = renderType.getJsoupDocument(data);

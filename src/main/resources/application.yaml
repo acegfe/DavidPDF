@@ -1,3 +1,5 @@
+server:
+  port: '8081'
 security:
   api:
     key: prodkey
@@ -7,4 +9,4 @@ spring:
       enabled: 'true'
       file: src/infra/docker-compose.yml
 selenium:
-  driver-path: "http://seleniarm:4444"
+  driver-path: "http://localhost:4444"
