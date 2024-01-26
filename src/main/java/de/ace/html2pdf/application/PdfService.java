@@ -24,7 +24,7 @@ public class PdfService {
             return postProcessorPdfComponent.attachFooter(footer, bs);
 
         } catch (Exception e) {
-            log.error(e.getMessage());
+            System.out.println(e.getMessage());
             throw DavidPDFException.Type.CORRUPTED_STREAM.boom();
         }
     }

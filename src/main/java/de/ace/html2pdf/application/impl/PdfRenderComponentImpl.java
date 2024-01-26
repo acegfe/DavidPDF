@@ -32,7 +32,7 @@ public class PdfRenderComponentImpl implements PdfRenderComponent {
         Optional<Element> optionalFooter = ofNullable(document.selectFirst("footer"));
 
         AtomicReference<String> result = new AtomicReference<>("");
-        optionalFooter.ifPresent(footer -> result.set(footer.html()));
+        optionalFooter.ifPresent(footer -> result.set(footer.outerHtml()));
         return result.get();
     }
 
@@ -59,8 +59,20 @@ public class PdfRenderComponentImpl implements PdfRenderComponent {
     @SneakyThrows
     @Override
     public String render(String data, RenderType renderType, ByteArrayOutputStream byteArrayOutputStream) {
-        byteArrayOutputStream.write(renderPdf(data, PdfRenderComponent.createRemoteDriver(Constants.getWebDriverPath()), renderType));
-        return findFooterByTag(data, renderType);
+        var footer = findFooterByTag(data, renderType);
+        var cleanData = cleanUpFooter(data, renderType);
+
+        byteArrayOutputStream.write(renderPdf(cleanData, PdfRenderComponent.createRemoteDriver(Constants.getWebDriverPath()), RenderType.TYPE_DATA));
+
+        return footer;
+    }
+
+    private String cleanUpFooter(String data, RenderType renderType) {
+        Document document = renderType.getJsoupDocument(data);
+
+        document.getElementsByTag("footer").clear();
+
+        return document.outerHtml();
     }
 
     @Override
