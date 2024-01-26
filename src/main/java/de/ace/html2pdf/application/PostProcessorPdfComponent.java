@@ -1,5 +1,6 @@
 package de.ace.html2pdf.application;
 
+import com.lowagie.text.pdf.BaseFont;
 import com.lowagie.text.pdf.PdfContentByte;
 import com.lowagie.text.pdf.PdfReader;
 import com.lowagie.text.pdf.PdfStamper;
@@ -24,14 +25,13 @@ public class PostProcessorPdfComponent {
                 ByteArrayOutputStream pdfWithFooterStream = new ByteArrayOutputStream();
                 PdfStamper stamper = new PdfStamper(reader, pdfWithFooterStream);
         ) {
-            BaseFont baseFont = BaseFont.createFont(BaseFont.HELVETICA, BaseFont.WINANSI, BaseFont.NOT_EMBEDDED);
+            //BaseFont baseFont = BaseFont.createFont(BaseFont.HELVETICA, BaseFont.WINANSI, BaseFont.NOT_EMBEDDED);
 
             // Loop over each page and add a footer
             for (int i = 1; i <= reader.getNumberOfPages(); i++) {
                 // Get the PdfContentByte object
                 PdfContentByte over = stamper.getOverContent(i);
 
-                // Add text at the bottom of the page
                 over.beginText();
                 over.setFontAndSize(baseFont, 12);
                 over.showTextAligned(Element.ALIGN_CENTER, footerText,
