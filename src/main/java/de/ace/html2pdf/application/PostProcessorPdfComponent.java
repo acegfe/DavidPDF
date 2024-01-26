@@ -40,22 +40,27 @@ public class PostProcessorPdfComponent {
 
             // Loop over each page and add a footer
             for (int i = 1; i <= reader.getNumberOfPages(); i++) {
-                float verticalSpacing = 10;
-                float leftAbsoluteMargin = 30;
-                float pageWidth = reader.getPageSize(i).getWidth();
-                float rightAbsoluteMargin = 30;
-                float maxXPosition = pageWidth - rightAbsoluteMargin;
                 float fontSize = 7;
 
-                PdfContentByte over = stamper.getOverContent(i);
+                float bottomMargin = 10;
+                float verticalSpacing = 10;
 
-                float portionsOfX = (maxXPosition - leftAbsoluteMargin) / document.children().size();
+                float leftAbsoluteMargin = 30;
+                float rightAbsoluteMargin = 30;
+
+                float pageWidth = reader.getPageSize(i).getWidth();
+
+                float maxXPosition = pageWidth - rightAbsoluteMargin;
+                float xMarginOffset = 20;
+                float portionsOfX = ((maxXPosition - leftAbsoluteMargin) / document.children().size()) + xMarginOffset;
+
+                PdfContentByte over = stamper.getOverContent(i);
 
                 for (int j = 0; j < document.children().size(); ++j) {
                     var column = document.children().get(j);
 
                     float startingX = leftAbsoluteMargin + (portionsOfX*j);
-                    float startingY = verticalSpacing*(column.children().size()-1);
+                    float startingY = (verticalSpacing*(column.children().size()-1))+bottomMargin;
 
                     over.beginText();
                     over.setFontAndSize(baseFont, fontSize);
@@ -64,10 +69,9 @@ public class PostProcessorPdfComponent {
                     for (int x = 0; x < column.children().size(); ++x) {
                         var row = column.children().get(x);
 
-                        var text = Optional.ofNullable(row.text()).orElse("emptyText").replace("[PAGE_COUNTER]", String.format("Page %s/%s", i, reader.getNumberOfPages()));
+                        var text = Optional.ofNullable(row.text()).orElse("errEmptyText!").replace("[PAGE_COUNTER]", String.format("Page %s/%s", i, reader.getNumberOfPages()));
                         over.showTextAligned(Element.ALIGN_LEFT, text, startingX, startingY - (x*verticalSpacing), 0);
                     }
-
                     over.endText();
 
                 }
