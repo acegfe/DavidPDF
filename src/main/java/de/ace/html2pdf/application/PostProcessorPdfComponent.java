@@ -2,6 +2,7 @@ package de.ace.html2pdf.application;
 
 import com.lowagie.text.Document;
 import com.lowagie.text.Element;
+import com.lowagie.text.HeaderFooter;
 import com.lowagie.text.pdf.BaseFont;
 import com.lowagie.text.pdf.PdfContentByte;
 import com.lowagie.text.pdf.PdfReader;
@@ -40,18 +41,18 @@ public class PostProcessorPdfComponent {
 
             // Loop over each page and add a footer
             for (int i = 1; i <= reader.getNumberOfPages(); i++) {
-                float fontSize = 7;
+                float fontSize = 6;
 
-                float bottomMargin = 10;
-                float verticalSpacing = 10;
+                float bottomMargin = 25;
+                float verticalSpacing = 6;
 
-                float leftAbsoluteMargin = 30;
+                float leftAbsoluteMargin = 50;
                 float rightAbsoluteMargin = 30;
 
                 float pageWidth = reader.getPageSize(i).getWidth();
 
                 float maxXPosition = pageWidth - rightAbsoluteMargin;
-                float xMarginOffset = 20;
+                float xMarginOffset = 0;
                 float portionsOfX = ((maxXPosition - leftAbsoluteMargin) / document.children().size()) + xMarginOffset;
 
                 PdfContentByte over = stamper.getOverContent(i);
@@ -69,9 +70,10 @@ public class PostProcessorPdfComponent {
                     for (int x = 0; x < column.children().size(); ++x) {
                         var row = column.children().get(x);
 
-                        var text = Optional.ofNullable(row.text()).orElse("errEmptyText!").replace("[PAGE_COUNTER]", String.format("Page %s/%s", i, reader.getNumberOfPages()));
+                        var text = Optional.ofNullable(row.text()).orElse("").replace("[PAGE_COUNTER]", String.format("Page %s/%s", i, reader.getNumberOfPages()));
                         over.showTextAligned(Element.ALIGN_LEFT, text, startingX, startingY - (x*verticalSpacing), 0);
                     }
+
                     over.endText();
 
                 }
