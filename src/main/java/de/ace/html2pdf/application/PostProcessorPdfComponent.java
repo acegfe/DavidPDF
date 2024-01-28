@@ -1,12 +1,12 @@
 package de.ace.html2pdf.application;
 
-import com.lowagie.text.Document;
-import com.lowagie.text.Element;
-import com.lowagie.text.HeaderFooter;
 import com.lowagie.text.pdf.BaseFont;
 import com.lowagie.text.pdf.PdfContentByte;
 import com.lowagie.text.pdf.PdfReader;
 import com.lowagie.text.pdf.PdfStamper;
+import de.ace.html2pdf.application.footer.Footer;
+import de.ace.html2pdf.application.footer.FooterMapper;
+import de.ace.html2pdf.application.footer.Style;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.jsoup.Jsoup;
@@ -14,10 +14,6 @@ import org.springframework.stereotype.Component;
 
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
-import java.io.OutputStream;
-import java.io.StreamCorruptedException;
-import java.util.Optional;
-import java.util.function.Consumer;
 
 @Component
 @RequiredArgsConstructor
@@ -26,57 +22,34 @@ public class PostProcessorPdfComponent {
 
     public byte[] attachFooter(String footer, ByteArrayOutputStream pdfRenderStream) {
 
-        System.out.println(footer);
-
         try (
                 PdfReader reader = new PdfReader(pdfRenderStream.toByteArray());
                 ByteArrayOutputStream pdfWithFooterStream = new ByteArrayOutputStream();
                 PdfStamper stamper = new PdfStamper(reader, pdfWithFooterStream);
         ) {
-            System.out.println(reader.getNumberOfPages());
-            System.out.println(reader.getPageSize(1));
 
-            BaseFont baseFont = BaseFont.createFont(BaseFont.HELVETICA, BaseFont.WINANSI, BaseFont.NOT_EMBEDDED);
-            var document = Jsoup.parse(footer).getElementsByTag("footer").get(0);
+            var element = Jsoup.parse(footer).getElementsByTag("footer").get(0);
+
 
             // Loop over each page and add a footer
-            for (int i = 1; i <= reader.getNumberOfPages(); i++) {
-                float fontSize = 6;
+            for (int page = 1; page <= reader.getNumberOfPages(); page++) {
 
-                float bottomMargin = 25;
-                float verticalSpacing = 6;
+                Footer footerE = FooterMapper.from(element,
+                        new Style(
+                                BaseFont.createFont(BaseFont.HELVETICA, BaseFont.WINANSI, BaseFont.NOT_EMBEDDED),
+                                6,
+                                6,
+                                25,
+                                50,
+                                50,
+                                reader.getPageSize(page).getWidth(),
+                                reader.getNumberOfPages(),
+                                0),
+                        page);
 
-                float leftAbsoluteMargin = 50;
-                float rightAbsoluteMargin = 30;
+                PdfContentByte over = stamper.getOverContent(page);
 
-                float pageWidth = reader.getPageSize(i).getWidth();
-
-                float maxXPosition = pageWidth - rightAbsoluteMargin;
-                float xMarginOffset = 0;
-                float portionsOfX = ((maxXPosition - leftAbsoluteMargin) / document.children().size()) + xMarginOffset;
-
-                PdfContentByte over = stamper.getOverContent(i);
-
-                for (int j = 0; j < document.children().size(); ++j) {
-                    var column = document.children().get(j);
-
-                    float startingX = leftAbsoluteMargin + (portionsOfX*j);
-                    float startingY = (verticalSpacing*(column.children().size()-1))+bottomMargin;
-
-                    over.beginText();
-                    over.setFontAndSize(baseFont, fontSize);
-                    over.setTextMatrix(startingX, startingY);
-
-                    for (int x = 0; x < column.children().size(); ++x) {
-                        var row = column.children().get(x);
-
-                        var text = Optional.ofNullable(row.text()).orElse("").replace("[PAGE_COUNTER]", String.format("Page %s/%s", i, reader.getNumberOfPages()));
-                        over.showTextAligned(Element.ALIGN_LEFT, text, startingX, startingY - (x*verticalSpacing), 0);
-                    }
-
-                    over.endText();
-
-                }
+                footerE.showOn(over);
             }
 
             stamper.close();
