@@ -20,7 +20,7 @@ import java.io.IOException;
 @Slf4j
 public class PostProcessorPdfComponent {
 
-    public byte[] attachFooter(String footer, ByteArrayOutputStream pdfRenderStream) {
+    public byte[] attachFooter(String footerText, ByteArrayOutputStream pdfRenderStream) {
 
         try (
                 PdfReader reader = new PdfReader(pdfRenderStream.toByteArray());
@@ -28,13 +28,12 @@ public class PostProcessorPdfComponent {
                 PdfStamper stamper = new PdfStamper(reader, pdfWithFooterStream);
         ) {
 
-            var element = Jsoup.parse(footer).getElementsByTag("footer").get(0);
+            var element = Jsoup.parse(footerText).getElementsByTag("footer").get(0);
 
-
-            // Loop over each page and add a footer
             for (int page = 1; page <= reader.getNumberOfPages(); page++) {
+                PdfContentByte over = stamper.getOverContent(page);
 
-                Footer footerE = FooterMapper.from(element,
+                Footer footer = FooterMapper.from(element,
                         new Style(
                                 BaseFont.createFont(BaseFont.HELVETICA, BaseFont.WINANSI, BaseFont.NOT_EMBEDDED),
                                 6,
@@ -46,10 +45,7 @@ public class PostProcessorPdfComponent {
                                 reader.getNumberOfPages(),
                                 0),
                         page);
-
-                PdfContentByte over = stamper.getOverContent(page);
-
-                footerE.showOn(over);
+                footer.showOn(over);
             }
 
             stamper.close();
