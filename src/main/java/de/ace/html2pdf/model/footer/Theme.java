@@ -1,8 +1,8 @@
-package de.ace.html2pdf.application.footer;
+package de.ace.html2pdf.model.footer;
 
 import com.lowagie.text.pdf.BaseFont;
 
-public record Style(
+public record Theme(
         BaseFont baseFont,
         float fontSize,
         float verticalSpacing,

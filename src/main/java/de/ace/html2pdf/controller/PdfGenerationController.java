@@ -1,9 +1,8 @@
-package de.ace.html2pdf.controller.v1;
+package de.ace.html2pdf.controller;
 
 import de.ace.html2pdf.application.PdfService;
-import de.ace.html2pdf.model.Constants;
-import de.ace.html2pdf.model.RenderType;
-import de.ace.html2pdf.application.PdfRenderComponent;
+import de.ace.html2pdf.config.DavidPDFException;
+import de.ace.html2pdf.model.PdfRequest;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpHeaders;
@@ -12,8 +11,7 @@ import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
-import java.net.MalformedURLException;
-import java.net.URISyntaxException;
+import java.nio.charset.StandardCharsets;
 
 /**
  * To be used with Docker. This requires that you build, compile and use docker-compose
@@ -28,18 +26,16 @@ public class PdfGenerationController {
 
     @GetMapping("/healthCheck")
     public ResponseEntity<String> healthCheck() {
-        return ResponseEntity.ok("Ok");
+        return ResponseEntity.ok("\uD83D\uDD25");
     }
 
-    /*
-    @GetMapping("/url")
-    public ResponseEntity<byte[]> generatePdfUrl(@RequestParam String url) throws MalformedURLException, URISyntaxException {
-        return new ResponseEntity<>(renderComponent.render(url, PdfRenderComponent.createRemoteDriver(Constants.getWebDriverPath()), RenderType.TYPE_URL), pdfContentTypeHeader(), HttpStatus.OK);
-    } */
-
     @PostMapping("/html")
-    public ResponseEntity<byte[]> generatePdfHtml(@RequestBody String htmlData) throws MalformedURLException, URISyntaxException {
-        return new ResponseEntity<>(pdfService.convert(htmlData, RenderType.TYPE_DATA), pdfContentTypeHeader(), HttpStatus.OK);
+    public ResponseEntity<byte[]> generatePdfHtml(@RequestBody PdfRequest pdfRequest) {
+        try {
+            return new ResponseEntity<>(pdfService.convert(pdfRequest), pdfContentTypeHeader(), HttpStatus.OK);
+        } catch (DavidPDFException e) {
+            return ResponseEntity.status(418).body(e.getMessage().getBytes(StandardCharsets.UTF_8));
+        }
     }
 
     private HttpHeaders pdfContentTypeHeader() {

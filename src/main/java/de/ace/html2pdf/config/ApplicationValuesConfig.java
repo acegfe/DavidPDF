@@ -1,20 +1,16 @@
 package de.ace.html2pdf.config;
 
-import de.ace.html2pdf.model.Constants;
-import org.springframework.beans.factory.annotation.Autowired;
+import lombok.Getter;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Configuration;
 
 @Configuration
+@Getter
 public class ApplicationValuesConfig {
 
-    @Autowired
-    public void setApiKey(@Value("${security.api.key}") String apiKey) {
-        Constants.setApiKey(apiKey);
-    }
+    @Value("${security.api.key}")
+    private String apiKey;
 
-    @Autowired
-    public void setWebDriverPath(@Value("${selenium.driver-path}") String path) {
-        Constants.setWebDriverPath(path);
-    }
+    @Value("${selenium.driver-path}")
+    private String path;
 }
