@@ -1,25 +1,92 @@
 # DavidPDF - HTML2PDF by Spring Boot, Selenium & Docker
-Microservice that converts HTML to PDF
+# README.md for HTML to PDF API
 
-There are two main root endpoints. Local & Docker
+## Overview
+This document provides a guide for using the HTML to PDF conversion API hosted at `http://address:8080/pdf/html`. This API allows you to convert HTML content to a PDF document, with customizable footer styles.
 
-Option Docker:
-- Clone the repository (I left the target on purpose).
-- Launch the docker-compose.yml
+## API Endpoint
+**URL:** `http://address:8080/pdf/html`
 
-End.
+## HTTP Method
+**POST**
 
-Tips on Docker:
-- Image of selenium are for my mac m1. Consider taking a look https://github.com/seleniumhq-community/docker-seleniarm
-- Dockerfile does not compile or build the application. It only wraps the jar file. So you need to mvn clean compile install.
-- If you make any modifications, remember to prune the old image of DavidPDF, if not modifications will not be shown
+## Headers
+- **Authorization**: `Bearer apiKey`
+
+## Request Body
+The body of the request should be a JSON object with the following keys:
+
+- **html**: A string containing the HTML content to be converted.
+- **footerStyle**: An object describing the style of the footer in the PDF. It contains the following properties:
+    - **fontSize**: The font size for the footer text (integer).
+    - **verticalSpacing**: The vertical spacing of the footer content (integer).
+    - **bottomMargin**: The bottom margin of the footer (integer).
+    - **leftAbsoluteMargin**: The left margin for the footer (integer).
+    - **rightAbsoluteMargin**: The right margin for the footer (integer).
+
+## Footer HTML Structure
+When including a footer in the HTML, it should be structured as follows:
+
+```html
+/**
+ * All the footer gets the same space, align left and vertical centered
+ * <footer>
+ *     <div> <!-- column 0 -->
+ *         <div> <!-- row 0 -->
+ *             [PAGE_COUNTER]
+ *         </div>
+ *     </div>
+ *     <div> <!-- column 1 -->
+ *         <div> <!-- row 0 -->
+ *              [b]Bold text
+ *         </div>
+ *     </div>
+ * </footer>
+ */
+```
+
+## Usage Example
+
+### JSON Request Body Example
+```json
+{
+  "html": "<h1>Your HTML Content Here</h1>",
+  "footerStyle": {
+    "fontSize": 6,
+    "verticalSpacing": 6,
+    "bottomMargin": 25,
+    "leftAbsoluteMargin": 50,
+    "rightAbsoluteMargin": 50
+  }
+}
+```
+
+### cURL Example
+```bash
+curl --location 'http://address:8080/pdf/html' \
+--header 'Authorization: Bearer apiKey' \
+--header 'Content-Type: application/json' \
+--data-raw '{
+  "html" : "",  
+  "footerStyle": {
+    "fontSize" : 6,
+    "verticalSpacing" : 6,
+    "bottomMargin" : 25,
+    "leftAbsoluteMargin" : 50,
+    "rightAbsoluteMargin" : 50
+  }
+}'
+```
 
 
-Option Local:
-- Install Chrome version 118 or 119. (It does not mind...)
-- In case of newer versions, please use this https://googlechromelabs.github.io/chrome-for-testing/ and replace my chromedriver.
-- Click once on the chromedriver so it gets installed.
-- Run the Spring Boot app.
+## Notes
+- The `[PAGE_COUNTER]` in the footer will be automatically replaced by the current page number in the generated PDF.
+- The `[b]` tag in the footer will make the following text bold.
+- Ensure that the HTML content is properly encoded and escaped to avoid JSON errors.
+
+---
+
+**End of README.md**
 
 
 
