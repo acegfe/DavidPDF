@@ -11,6 +11,7 @@ public record Theme(
         float rightAbsoluteMargin,
         float pageWidth,
         int numberPages,
-        float xElementsOffset
+        float xElementsOffset,
+        int textAlignment
 ) {
 }

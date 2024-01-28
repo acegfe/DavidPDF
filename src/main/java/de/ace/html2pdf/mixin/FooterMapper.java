@@ -48,7 +48,8 @@ public interface FooterMapper {
                 footerStyle.rightAbsoluteMargin(),
                 pdfReader.getPageSize(page).getWidth(),
                 pdfReader.getNumberOfPages(),
-                0);
+                0,
+                com.lowagie.text.Element.ALIGN_LEFT);
     }
 
     @SneakyThrows

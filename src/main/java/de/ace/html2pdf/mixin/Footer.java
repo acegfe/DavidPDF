@@ -1,6 +1,5 @@
 package de.ace.html2pdf.mixin;
 
-import com.lowagie.text.Element;
 import com.lowagie.text.pdf.PdfContentByte;
 import lombok.AllArgsConstructor;
 
@@ -17,7 +16,7 @@ public class Footer {
 
         float totalRowXSize = columns.stream().map(Column::getHorizontalSize).reduce(0f, Float::sum);
         float totalDrawXSize = maxXPosition - minXPosition;
-        float marginBetweenRows = (totalDrawXSize - totalRowXSize) / (columns.size()-1);
+        float marginBetweenRows = (totalDrawXSize - totalRowXSize) / (columns.size() - 1);
 
         int maxRowYSize = columns.stream().map(Column::getVerticalSize).reduce(0, Integer::max);
         float normalizedMaxYSize = maxRowYSize * theme.verticalSpacing();
@@ -32,18 +31,13 @@ public class Footer {
             float centeringMargin = (normalizedMaxYSize - rowYSize) / 2f;
 
             float startingY = rowYSize + centeringMargin + theme.bottomMargin();
-            float startingX = minXPosition + columns.stream().limit(i).map(Column::getHorizontalSize).reduce(0f, Float::sum) + (marginBetweenRows*i);
-
-            over.beginText();
-            over.setFontAndSize(theme.baseFont(), theme.fontSize());
-            over.setTextMatrix(startingX, startingY);
+            float startingX = minXPosition + columns.stream().limit(i)
+                    .map(Column::getHorizontalSize).reduce(0f, Float::sum) + (marginBetweenRows * i);
 
             for (int x = 0; x < column.getRows().size(); ++x) {
                 var row = column.getRows().get(x);
-                over.showTextAligned(Element.ALIGN_LEFT, row, startingX, startingY - (x * theme.verticalSpacing()), 0);
+                row.operate(over, startingX, startingY - (x * theme.verticalSpacing()));
             }
-
-            over.endText();
 
         }
 
