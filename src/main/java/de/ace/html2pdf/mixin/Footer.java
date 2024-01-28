@@ -1,4 +1,4 @@
-package de.ace.html2pdf.model.footer;
+package de.ace.html2pdf.mixin;
 
 import com.lowagie.text.Element;
 import com.lowagie.text.pdf.PdfContentByte;
@@ -11,7 +11,7 @@ public class Footer {
     private List<Column> columns;
     private Theme theme;
 
-    public void showOn(PdfContentByte over) {
+    public void operate(PdfContentByte over) {
         float minXPosition = theme.leftAbsoluteMargin();
         float maxXPosition = theme.pageWidth() - theme.rightAbsoluteMargin();
 

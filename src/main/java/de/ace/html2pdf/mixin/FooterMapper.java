@@ -1,4 +1,4 @@
-package de.ace.html2pdf.model.footer;
+package de.ace.html2pdf.mixin;
 
 import com.lowagie.text.pdf.BaseFont;
 import com.lowagie.text.pdf.PdfReader;
@@ -37,10 +37,10 @@ public interface FooterMapper {
         return new Footer(columns, theme);
     }
 
-    @SneakyThrows
+
     static Theme themeFrom(FooterStyle footerStyle, PdfReader pdfReader, int page) {
         return new Theme(
-                BaseFont.createFont(BaseFont.HELVETICA, BaseFont.WINANSI, BaseFont.NOT_EMBEDDED),
+                getBaseFont(false),
                 footerStyle.fontSize(),
                 footerStyle.verticalSpacing(),
                 footerStyle.bottomMargin(),
@@ -49,5 +49,14 @@ public interface FooterMapper {
                 pdfReader.getPageSize(page).getWidth(),
                 pdfReader.getNumberOfPages(),
                 0);
+    }
+
+    @SneakyThrows
+    static BaseFont getBaseFont(boolean bold) {
+        if (bold) {
+            return BaseFont.createFont(BaseFont.HELVETICA_BOLD, BaseFont.WINANSI, BaseFont.NOT_EMBEDDED);
+        }
+
+        return BaseFont.createFont(BaseFont.HELVETICA, BaseFont.WINANSI, BaseFont.NOT_EMBEDDED);
     }
 }

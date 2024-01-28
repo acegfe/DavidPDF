@@ -1,5 +1,6 @@
-package de.ace.html2pdf.model.footer;
+package de.ace.html2pdf.mixin;
 
+import com.lowagie.text.pdf.BaseFont;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 
@@ -21,6 +22,6 @@ public class Column {
     }
 
     private float getWidthPoint(String maxPrintedString) {
-        return theme.baseFont().getWidthPoint(maxPrintedString, theme.fontSize());
+        return FooterMapper.getBaseFont(false).getWidthPoint(maxPrintedString, theme.fontSize());
     }
 }

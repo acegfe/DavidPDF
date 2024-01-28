@@ -1,4 +1,4 @@
-package de.ace.html2pdf.model.footer;
+package de.ace.html2pdf.mixin;
 
 import com.lowagie.text.pdf.BaseFont;
 

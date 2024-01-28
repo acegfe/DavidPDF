@@ -5,8 +5,8 @@ import com.lowagie.text.pdf.PdfReader;
 import com.lowagie.text.pdf.PdfStamper;
 import de.ace.html2pdf.config.DavidPDFException;
 import de.ace.html2pdf.model.FooterStyle;
-import de.ace.html2pdf.model.footer.Footer;
-import de.ace.html2pdf.model.footer.FooterMapper;
+import de.ace.html2pdf.mixin.Footer;
+import de.ace.html2pdf.mixin.FooterMapper;
 import lombok.RequiredArgsConstructor;
 import org.jsoup.nodes.Element;
 import org.springframework.stereotype.Component;
@@ -32,7 +32,7 @@ public class PostProcessorPdfComponent {
                     Footer footer = FooterMapper.footerFrom(element,
                             FooterMapper.themeFrom(footerStyle, reader, page),
                             page);
-                    footer.showOn(over);
+                    footer.operate(over);
                 }
             });
 
