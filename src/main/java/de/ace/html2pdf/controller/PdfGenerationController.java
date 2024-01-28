@@ -2,7 +2,6 @@ package de.ace.html2pdf.controller;
 
 import de.ace.html2pdf.application.PdfService;
 import de.ace.html2pdf.config.DavidPDFException;
-import de.ace.html2pdf.model.FooterStyle;
 import de.ace.html2pdf.model.PdfRequest;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -31,14 +30,9 @@ public class PdfGenerationController {
     }
 
     @PostMapping("/html")
-    public ResponseEntity<byte[]> generatePdfHtml(@RequestBody String html, @RequestParam float fontSize,
-                                                  @RequestParam float verticalSpacing,
-                                                  @RequestParam float bottomMargin,
-                                                  @RequestParam float leftAbsoluteMargin,
-                                                  @RequestParam float rightAbsoluteMargin) {
+    public ResponseEntity<byte[]> generatePdfHtml(@RequestBody PdfRequest pdfRequest) {
         try {
-            return new ResponseEntity<>(pdfService.convert(new PdfRequest(html,
-                    new FooterStyle(fontSize, verticalSpacing, bottomMargin, leftAbsoluteMargin, rightAbsoluteMargin))),
+            return new ResponseEntity<>(pdfService.convert(pdfRequest),
                     pdfContentTypeHeader(), HttpStatus.OK);
         } catch (DavidPDFException e) {
             return ResponseEntity.status(418).body(e.getMessage().getBytes(StandardCharsets.UTF_8));
