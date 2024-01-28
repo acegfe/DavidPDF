@@ -39,7 +39,7 @@ public class PdfRenderComponent {
         Document document = Jsoup.parse(html);
         Optional<Element> footer = extractFooterTag(document);
 
-        byteArrayOutputStream.write(renderPdf(document, createRemoteDriver(config.getPath())));
+        byteArrayOutputStream.write(renderPdf(document.toString(), createRemoteDriver(config.getPath())));
         return footer;
     }
 
@@ -49,8 +49,8 @@ public class PdfRenderComponent {
         return footer;
     }
 
-    private byte[] renderPdf(final Document data, final WebDriver driver) {
-        driver.get("data:text/html," + UriEncoder.encode(data.data()));
+    private byte[] renderPdf(final String data, final WebDriver driver) {
+        driver.get("data:text/html," + UriEncoder.encode(data));
 
         new WebDriverWait(driver, Duration.ofSeconds(5))
                 .until(webDriver -> ((JavascriptExecutor) webDriver)

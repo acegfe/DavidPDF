@@ -7,6 +7,7 @@ import lombok.SneakyThrows;
 import org.jsoup.nodes.Element;
 
 import java.util.Optional;
+import java.util.function.Function;
 
 public interface FooterMapper {
 
@@ -29,10 +30,11 @@ public interface FooterMapper {
     static Footer footerFrom(Element footer, Theme theme, int page) {
         var columns = footer.children().stream().map(
                 element -> new Column(
-                        element.children().stream().map(
-                                element1 -> Optional.ofNullable(element1.text()).orElse("")
-                                        .replace("[PAGE_COUNTER]",
-                                                String.format("Seite %s von %s", page, theme.numberPages()))).toList(), theme)).toList();
+                        element.children().stream()
+                                .map(element1 -> Optional.ofNullable(element1.text()).orElse("")
+                                        .replace("[PAGE_COUNTER]", String.format("Seite %s von %s", page, theme.numberPages())))
+                                .map(string -> new Row(string, theme)).toList(),
+                        theme)).toList();
 
         return new Footer(columns, theme);
     }
