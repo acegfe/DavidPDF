@@ -6,6 +6,7 @@ import lombok.RequiredArgsConstructor;
 import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
 import org.jsoup.nodes.Element;
+import org.jsoup.select.Elements;
 import org.openqa.selenium.JavascriptExecutor;
 import org.openqa.selenium.PrintsPage;
 import org.openqa.selenium.WebDriver;
@@ -47,6 +48,12 @@ public class PdfRenderComponent {
         var footer = document.getElementsByTag("footer").stream().findFirst();
         document.getElementsByTag("footer").clear();
         return footer;
+    }
+
+    private byte[] clearBesidesFooter(Document document, final WebDriver driver) {
+        Elements footerSiblings = document.selectFirst("footer").siblingElements();
+        footerSiblings.clear();
+        return renderPdf(document.outerHtml(), driver);
     }
 
     private byte[] renderPdf(final String data, final WebDriver driver) {
