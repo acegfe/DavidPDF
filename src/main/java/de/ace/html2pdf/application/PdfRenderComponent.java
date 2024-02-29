@@ -3,13 +3,12 @@ package de.ace.html2pdf.application;
 import de.ace.html2pdf.config.ApplicationValuesConfig;
 import de.ace.html2pdf.config.DavidPDFException;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
 import org.jsoup.nodes.Element;
 import org.jsoup.select.Elements;
-import org.openqa.selenium.JavascriptExecutor;
-import org.openqa.selenium.PrintsPage;
-import org.openqa.selenium.WebDriver;
+import org.openqa.selenium.*;
 import org.openqa.selenium.chrome.ChromeOptions;
 import org.openqa.selenium.print.PrintOptions;
 import org.openqa.selenium.remote.RemoteWebDriver;
@@ -27,6 +26,7 @@ import static java.util.Base64.getDecoder;
 
 @Component
 @RequiredArgsConstructor
+@Slf4j
 public class PdfRenderComponent {
 
     private final ApplicationValuesConfig config;
@@ -50,10 +50,27 @@ public class PdfRenderComponent {
         return footer;
     }
 
-    private byte[] clearBesidesFooter(Document document, final WebDriver driver) {
+    public byte[] clearFooter(final String html) {
+        var document = Jsoup.parse(html);
+        document.getElementsByTag("footer").clear();
+        var driver = createRemoteDriver(config.getPath());
+        return renderPdf(document.outerHtml(), driver);
+    }
+
+    public byte[] clearBesidesFooter(final String html) {
+        var document = Jsoup.parse(html);
+        var driver = createRemoteDriver(config.getPath());
         Elements footerSiblings = document.selectFirst("footer").siblingElements();
         footerSiblings.clear();
-        return renderPdf(document.outerHtml(), driver);
+        var footerHtml = document.outerHtml();
+        log.info("Footer height: {}", calculateElementHeight(footerHtml, "footer", driver));
+        return renderPdf(footerHtml, driver);
+    }
+
+    public int calculateElementHeight(String html, String elementTag, final WebDriver driver) {
+        driver.get("data:text/html," + UriEncoder.encode(html));
+        WebElement element = driver.findElement(By.tagName(elementTag));
+        return element.getSize().getHeight();
     }
 
     private byte[] renderPdf(final String data, final WebDriver driver) {
