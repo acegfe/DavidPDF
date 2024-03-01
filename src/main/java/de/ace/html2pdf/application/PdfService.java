@@ -1,16 +1,23 @@
 package de.ace.html2pdf.application;
 
-import com.lowagie.text.pdf.PdfDocument;
-import com.lowagie.text.pdf.PdfReader;
+import com.itextpdf.html2pdf.HtmlConverter;
+import com.itextpdf.text.Document;
+import com.itextpdf.text.PageSize;
+import com.itextpdf.text.Paragraph;
+import com.itextpdf.text.pdf.PdfTemplate;
+import com.itextpdf.text.pdf.PdfWriter;
 import de.ace.html2pdf.config.DavidPDFException;
+import de.ace.html2pdf.model.PdfData;
 import de.ace.html2pdf.model.PdfRequest;
 import lombok.RequiredArgsConstructor;
+import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.pdfbox.multipdf.LayerUtility;
 import org.apache.pdfbox.pdmodel.PDDocument;
 import org.apache.pdfbox.pdmodel.PDPage;
 import org.apache.pdfbox.pdmodel.PDPageContentStream;
-import org.apache.pdfbox.pdmodel.PDPageTree;
 import org.apache.pdfbox.pdmodel.common.PDRectangle;
+import org.apache.pdfbox.pdmodel.graphics.form.PDFormXObject;
 import org.apache.pdfbox.pdmodel.graphics.image.PDImageXObject;
 import org.apache.pdfbox.rendering.PDFRenderer;
 import org.springframework.stereotype.Service;
@@ -20,6 +27,7 @@ import java.awt.image.BufferedImage;
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
+import java.io.InputStream;
 
 @Service
 @Slf4j
@@ -41,24 +49,32 @@ public class PdfService {
     }
 
     public byte[] mergePdf(String html) {
-        byte[] mainBytes = pdfRenderComponent.clearFooter(html);
-        byte[] footerBytes = pdfRenderComponent.clearBesidesFooter(html);
-        try (PDDocument mainDocument = PDDocument.load(new ByteArrayInputStream(mainBytes));
-             PDDocument footerDocument = PDDocument.load(new ByteArrayInputStream(footerBytes));
-             ByteArrayOutputStream byteArrayOutputStream = new ByteArrayOutputStream()) {
-            var pdImage = getPrintingImage(footerDocument, mainDocument, "footer");
-            for (var page : mainDocument.getPages()) {
-                PDPageContentStream contentStream = new PDPageContentStream(mainDocument, page, PDPageContentStream.AppendMode.APPEND, true);
-                contentStream.drawImage(pdImage, 0, 0);
-                contentStream.close();
-            }
-            mainDocument.save(byteArrayOutputStream);
-            return byteArrayOutputStream.toByteArray();
+        PdfData pdfData = pdfRenderComponent.parseHtmlToPdf(html);
+        try (PDDocument mainDocument = PDDocument.load(new ByteArrayInputStream(pdfData.getMainBytes()));
+             PDDocument footerDocument = PDDocument.load(new ByteArrayInputStream(pdfData.getFooterBytes()));
+             ByteArrayOutputStream outputStream = new ByteArrayOutputStream()) {
+
+            var fp = pdfData.getFooterProperties();
+            PDRectangle cropBox = new PDRectangle(fp.getLocation().x, fp.getLocation().y, fp.getWidth(), fp.getHeight());
+//            cropBox.getCOSArray()
+//            PDPage footerPage = footerDocument.getPage(0);
+//            footerPage.getMediaBox().setUpperRightX();
+//            footerPage.getResources().c
+//            PDPageContentStream contentStream = new PDPageContentStream()
+            return outputStream.toByteArray();
         } catch (Exception e) {
             log.error(e.getMessage());
             throw new DavidPDFException("Shit");
         }
     }
+
+//    @SneakyThrows
+//    public byte[] foo(String html) {
+//        byte[] footerBytes = pdfRenderComponent.clearBesidesFooter(html);
+//        PDDocument pdDocument = PDDocument.load(footerBytes);
+//        pdDocument.getPage(0).setCropBox(new PDRectangle());
+//    }
+
 
     private PDImageXObject getPrintingImage(PDDocument sourceDocument, PDDocument targetDocument, String imageName) throws IOException {
         BufferedImage image = new PDFRenderer(sourceDocument).renderImage(0);

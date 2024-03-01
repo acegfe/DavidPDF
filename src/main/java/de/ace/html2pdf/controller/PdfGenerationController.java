@@ -44,12 +44,12 @@ public class PdfGenerationController {
 
     @PostMapping("/footer")
     public ResponseEntity<byte[]> extractFooter(@RequestBody String html) {
-        return new ResponseEntity<>(pdfRenderComponent.clearBesidesFooter(html), pdfContentTypeHeader(), OK);
+        return new ResponseEntity<>(pdfRenderComponent.parseHtmlToPdf(html).getFooterBytes(), pdfContentTypeHeader(), OK);
     }
 
-    @PostMapping("/test")
+    @PostMapping("/main")
     public ResponseEntity<byte[]> merge(@RequestBody String html) {
-        return new ResponseEntity<>(pdfService.mergePdf(html), pdfContentTypeHeader(), OK);
+        return new ResponseEntity<>(pdfRenderComponent.parseHtmlToPdf(html).getMainBytes(), pdfContentTypeHeader(), OK);
     }
 
     private HttpHeaders pdfContentTypeHeader() {

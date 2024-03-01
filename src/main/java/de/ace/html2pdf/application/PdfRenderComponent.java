@@ -2,6 +2,8 @@ package de.ace.html2pdf.application;
 
 import de.ace.html2pdf.config.ApplicationValuesConfig;
 import de.ace.html2pdf.config.DavidPDFException;
+import de.ace.html2pdf.model.FooterProperties;
+import de.ace.html2pdf.model.PdfData;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.jsoup.Jsoup;
@@ -10,6 +12,7 @@ import org.jsoup.nodes.Element;
 import org.jsoup.select.Elements;
 import org.openqa.selenium.*;
 import org.openqa.selenium.chrome.ChromeOptions;
+import org.openqa.selenium.devtools.v119.css.CSS;
 import org.openqa.selenium.print.PrintOptions;
 import org.openqa.selenium.remote.RemoteWebDriver;
 import org.openqa.selenium.support.ui.WebDriverWait;
@@ -50,30 +53,56 @@ public class PdfRenderComponent {
         return footer;
     }
 
-    public byte[] clearFooter(final String html) {
+    public PdfData parseHtmlToPdf(final String html) {
+        var driver = createRemoteDriver(config.getPath());
+        String footerHtml = clearBesidesFooter(html);
+        FooterProperties footerProperties = calculateFooterProperties(html, driver);
+        String mainHtml = addMarginStyle(clearFooter(html), footerProperties.getHeight());
+        var pdfData = PdfData.builder()
+                .mainBytes(renderPdf(mainHtml, driver))
+                .footerBytes(renderPdf(footerHtml, driver))
+                .footerProperties(footerProperties)
+                .build();
+        driver.quit();
+        return pdfData;
+    }
+
+    private String addMarginStyle(String html, int footerHeight) {
+        Document doc = Jsoup.parse(html);
+        Element styleTag = doc.selectFirst("style");
+        if (styleTag != null) {
+            String existingStyle = styleTag.html();
+            String newStyle = String.format("\n@page { margin-bottom: %dpx }", footerHeight);
+            String combinedStyle = existingStyle + newStyle;
+            styleTag.text(combinedStyle);
+        }
+        return doc.outerHtml();
+    }
+
+    private String clearFooter(final String html) {
         var document = Jsoup.parse(html);
         document.getElementsByTag("footer").clear();
-        var driver = createRemoteDriver(config.getPath());
-        return renderPdf(document.outerHtml(), driver);
+        return document.outerHtml();
     }
 
-    public byte[] clearBesidesFooter(final String html) {
+    private String clearBesidesFooter(final String html) {
         var document = Jsoup.parse(html);
-        var driver = createRemoteDriver(config.getPath());
         Elements footerSiblings = document.selectFirst("footer").siblingElements();
         footerSiblings.clear();
-        var footerHtml = document.outerHtml();
-        log.info("Footer height: {}", calculateElementHeight(footerHtml, "footer", driver));
-        return renderPdf(footerHtml, driver);
+        return document.outerHtml();
     }
 
-    public int calculateElementHeight(String html, String elementTag, final WebDriver driver) {
+    private FooterProperties calculateFooterProperties(String html, final WebDriver driver) {
         driver.get("data:text/html," + UriEncoder.encode(html));
-        WebElement element = driver.findElement(By.tagName(elementTag));
-        return element.getSize().getHeight();
+        WebElement element = driver.findElement(By.tagName("footer"));
+        return FooterProperties.builder()
+                .height(element.getSize().getHeight())
+                .width(element.getSize().getWidth())
+                .location(element.getLocation())
+                .build();
     }
 
-    private byte[] renderPdf(final String data, final WebDriver driver) {
+    private byte[] renderPdf(final String data, WebDriver driver) {
         driver.get("data:text/html," + UriEncoder.encode(data));
 
         new WebDriverWait(driver, Duration.ofSeconds(5))
@@ -83,10 +112,6 @@ public class PdfRenderComponent {
         PrintOptions printOptions = new PrintOptions();
         printOptions.setBackground(true);
         var pdf = ((PrintsPage) driver).print(printOptions);
-
-        if (driver instanceof RemoteWebDriver remoteWebDriver) {
-            remoteWebDriver.quit();
-        }
 
         return getDecoder().decode(pdf.getContent());
     }
