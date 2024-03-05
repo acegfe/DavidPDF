@@ -1,14 +1,7 @@
 package de.ace.html2pdf.model;
 
 import lombok.Builder;
-import lombok.Data;
 import org.openqa.selenium.Point;
 
-@Data
-@Builder
-public class FooterProperties {
+public record FooterProperties(int height, int width, Point location) {}
 
-    private int height;
-    private int width;
-    private Point location;
-}

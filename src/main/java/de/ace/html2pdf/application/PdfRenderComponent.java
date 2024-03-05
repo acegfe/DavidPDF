@@ -1,5 +1,6 @@
 package de.ace.html2pdf.application;
 
+import com.itextpdf.text.pdf.parser.PdfReaderContentParser;
 import de.ace.html2pdf.config.ApplicationValuesConfig;
 import de.ace.html2pdf.config.DavidPDFException;
 import de.ace.html2pdf.model.FooterProperties;
@@ -57,7 +58,7 @@ public class PdfRenderComponent {
         var driver = createRemoteDriver(config.getPath());
         String footerHtml = clearBesidesFooter(html);
         FooterProperties footerProperties = calculateFooterProperties(html, driver);
-        String mainHtml = addMarginStyle(clearFooter(html), footerProperties.getHeight());
+        String mainHtml = addMarginStyle(clearFooter(html), footerProperties.height());
         var pdfData = PdfData.builder()
                 .mainBytes(renderPdf(mainHtml, driver))
                 .footerBytes(renderPdf(footerHtml, driver))
@@ -95,11 +96,7 @@ public class PdfRenderComponent {
     private FooterProperties calculateFooterProperties(String html, final WebDriver driver) {
         driver.get("data:text/html," + UriEncoder.encode(html));
         WebElement element = driver.findElement(By.tagName("footer"));
-        return FooterProperties.builder()
-                .height(element.getSize().getHeight())
-                .width(element.getSize().getWidth())
-                .location(element.getLocation())
-                .build();
+        return new FooterProperties(element.getSize().getHeight(), element.getSize().getWidth(), element.getLocation());
     }
 
     private byte[] renderPdf(final String data, WebDriver driver) {

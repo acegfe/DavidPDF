@@ -1,33 +1,22 @@
 package de.ace.html2pdf.application;
 
-import com.itextpdf.html2pdf.HtmlConverter;
-import com.itextpdf.text.Document;
-import com.itextpdf.text.PageSize;
-import com.itextpdf.text.Paragraph;
-import com.itextpdf.text.pdf.PdfTemplate;
-import com.itextpdf.text.pdf.PdfWriter;
+
+import com.itextpdf.text.pdf.PdfReader;
+import com.itextpdf.text.pdf.parser.PdfTextExtractor;
 import de.ace.html2pdf.config.DavidPDFException;
 import de.ace.html2pdf.model.PdfData;
 import de.ace.html2pdf.model.PdfRequest;
 import lombok.RequiredArgsConstructor;
 import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
-import org.apache.pdfbox.multipdf.LayerUtility;
-import org.apache.pdfbox.pdmodel.PDDocument;
-import org.apache.pdfbox.pdmodel.PDPage;
-import org.apache.pdfbox.pdmodel.PDPageContentStream;
-import org.apache.pdfbox.pdmodel.common.PDRectangle;
-import org.apache.pdfbox.pdmodel.graphics.form.PDFormXObject;
-import org.apache.pdfbox.pdmodel.graphics.image.PDImageXObject;
-import org.apache.pdfbox.rendering.PDFRenderer;
+
 import org.springframework.stereotype.Service;
 
 import javax.imageio.ImageIO;
 import java.awt.image.BufferedImage;
-import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
-import java.io.InputStream;
+import java.util.Locale;
 
 @Service
 @Slf4j
@@ -48,38 +37,56 @@ public class PdfService {
         }
     }
 
-    public byte[] mergePdf(String html) {
+    @SneakyThrows
+    public String mergePdf(String html) {
         PdfData pdfData = pdfRenderComponent.parseHtmlToPdf(html);
-        try (PDDocument mainDocument = PDDocument.load(new ByteArrayInputStream(pdfData.getMainBytes()));
-             PDDocument footerDocument = PDDocument.load(new ByteArrayInputStream(pdfData.getFooterBytes()));
-             ByteArrayOutputStream outputStream = new ByteArrayOutputStream()) {
-
-            var fp = pdfData.getFooterProperties();
-            PDRectangle cropBox = new PDRectangle(fp.getLocation().x, fp.getLocation().y, fp.getWidth(), fp.getHeight());
-//            cropBox.getCOSArray()
-//            PDPage footerPage = footerDocument.getPage(0);
-//            footerPage.getMediaBox().setUpperRightX();
-//            footerPage.getResources().c
-//            PDPageContentStream contentStream = new PDPageContentStream()
-            return outputStream.toByteArray();
-        } catch (Exception e) {
-            log.error(e.getMessage());
-            throw new DavidPDFException("Shit");
-        }
+        var baos = new ByteArrayOutputStream();
+        PdfReader pdfReader = new PdfReader(pdfData.getFooterBytes());
+        String text = PdfTextExtractor.getTextFromPage(pdfReader, 1);
+        return text;
     }
 
-//    @SneakyThrows
-//    public byte[] foo(String html) {
-//        byte[] footerBytes = pdfRenderComponent.clearBesidesFooter(html);
-//        PDDocument pdDocument = PDDocument.load(footerBytes);
-//        pdDocument.getPage(0).setCropBox(new PDRectangle());
+
+//    protected void manipulate1Pdf(String dest, String SRC) throws Exception {
+//        PdfDocument pdfDoc = new PdfDocument(new PdfReader(SRC), new PdfWriter(dest));
+//
+//        for (int p = 1; p <= pdfDoc.getNumberOfPages(); p++) {
+//            PdfPage page = pdfDoc.getPage(p);
+//            Rectangle media = page.getCropBox();
+//
+//            if (media == null) {
+//                media = page.getMediaBox();
+//            }
+//            float llx = media.getX() + 200;
+//            float lly = media.getY() + 200;
+//            float w = media.getWidth() - 400;
+//            float h = media.getHeight() - 400;
+//
+//            // It's important to write explicit Locale settings, because decimal separator differs in
+//            // different regions and in PDF only dot is respected
+//            String command = String.format(Locale.ENGLISH,
+//
+//                    // re operator constructs a rectangle
+//                    // W operator - sets the clipping path
+//                    // n operator - starts a new path
+//                    // q, Q - operators save and restore the graphics state stack
+//                    "\nq %.2f %.2f %.2f %.2f re W n\nq\n", llx, lly, w, h);
+//
+//            // The content, placed on a content stream before, will be rendered before the other content
+//            // and, therefore, could be understood as a background (bottom "layer")
+//            PdfPage pdfPage = pdfDoc.getPage(p);
+//            new PdfCanvas(pdfPage.newContentStreamBefore(), pdfPage.getResources(), pdfDoc)
+//                    .writeLiteral(command);
+//
+//            // The content, placed on a content stream after, will be rendered after the other content
+//            // and, therefore, could be understood as a foreground (top "layer")
+//            new PdfCanvas(pdfPage.newContentStreamAfter(), pdfPage.getResources(), pdfDoc)
+//                    .writeLiteral("\nQ\nQ\n");
+//        }
+//
+//        pdfDoc.close();
 //    }
 
-
-    private PDImageXObject getPrintingImage(PDDocument sourceDocument, PDDocument targetDocument, String imageName) throws IOException {
-        BufferedImage image = new PDFRenderer(sourceDocument).renderImage(0);
-        return PDImageXObject.createFromByteArray(targetDocument, toByteArray(image, "png"), imageName);
-    }
 
     private static byte[] toByteArray(BufferedImage bi, String format)
             throws IOException {

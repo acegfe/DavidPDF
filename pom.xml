@@ -49,26 +49,11 @@
             <version>1.17.2</version>
         </dependency>
         <dependency>
-            <groupId>com.github.librepdf</groupId>
-            <artifactId>openpdf-fonts-extra</artifactId>
-            <version>${openpdf.version}</version>
-        </dependency>
-        <dependency>
-            <groupId>com.github.librepdf</groupId>
-            <artifactId>openpdf</artifactId>
-            <version>${openpdf.version}</version>
-        </dependency>
-        <dependency>
             <groupId>org.xhtmlrenderer</groupId>
             <artifactId>flying-saucer-core</artifactId>
             <version>9.1.22</version>
         </dependency>
         <!-- https://mvnrepository.com/artifact/org.apache.pdfbox/pdfbox -->
-        <dependency>
-            <groupId>org.apache.pdfbox</groupId>
-            <artifactId>pdfbox</artifactId>
-            <version>2.0.30</version>
-        </dependency>
 
         <!-- https://mvnrepository.com/artifact/com.itextpdf/itextpdf -->
         <dependency>
@@ -76,29 +61,9 @@
             <artifactId>itextpdf</artifactId>
             <version>5.5.13.3</version>
         </dependency>
-        <!-- https://mvnrepository.com/artifact/com.itextpdf/html2pdf -->
-        <dependency>
-            <groupId>com.itextpdf</groupId>
-            <artifactId>html2pdf</artifactId>
-            <version>5.0.3</version>
-        </dependency>
         <dependency>
             <groupId>org.springframework.boot</groupId>
             <artifactId>spring-boot-starter-thymeleaf</artifactId>
-        </dependency>
-        <dependency>
-            <groupId>com.aspose-pdf</groupId>
-            <artifactId>sample</artifactId>
-            <version>1.0</version>
-            <scope>system</scope>
-            <systemPath>${project.basedir}/src/main/resources/aspose-pdf-24.2.jar</systemPath>
-        </dependency>
-
-        <!-- https://mvnrepository.com/artifact/com.helger/ph-css -->
-        <dependency>
-            <groupId>com.helger</groupId>
-            <artifactId>ph-css</artifactId>
-            <version>7.0.1</version>
         </dependency>
 
         <dependency>

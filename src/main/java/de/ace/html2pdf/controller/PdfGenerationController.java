@@ -47,6 +47,11 @@ public class PdfGenerationController {
         return new ResponseEntity<>(pdfRenderComponent.parseHtmlToPdf(html).getFooterBytes(), pdfContentTypeHeader(), OK);
     }
 
+    @PostMapping("/footer/text")
+    public ResponseEntity<byte[]> extractFooterText(@RequestBody String html) {
+        return new ResponseEntity<>(pdfRenderComponent., pdfContentTypeHeader(), OK);
+    }
+
     @PostMapping("/main")
     public ResponseEntity<byte[]> merge(@RequestBody String html) {
         return new ResponseEntity<>(pdfRenderComponent.parseHtmlToPdf(html).getMainBytes(), pdfContentTypeHeader(), OK);
