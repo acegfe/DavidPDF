@@ -1,6 +1,5 @@
 package de.ace.html2pdf.application;
 
-import com.itextpdf.text.pdf.parser.PdfReaderContentParser;
 import de.ace.html2pdf.config.ApplicationValuesConfig;
 import de.ace.html2pdf.config.DavidPDFException;
 import de.ace.html2pdf.model.FooterProperties;
@@ -13,7 +12,6 @@ import org.jsoup.nodes.Element;
 import org.jsoup.select.Elements;
 import org.openqa.selenium.*;
 import org.openqa.selenium.chrome.ChromeOptions;
-import org.openqa.selenium.devtools.v119.css.CSS;
 import org.openqa.selenium.print.PrintOptions;
 import org.openqa.selenium.remote.RemoteWebDriver;
 import org.openqa.selenium.support.ui.WebDriverWait;
@@ -96,7 +94,11 @@ public class PdfRenderComponent {
     private FooterProperties calculateFooterProperties(String html, final WebDriver driver) {
         driver.get("data:text/html," + UriEncoder.encode(html));
         WebElement element = driver.findElement(By.tagName("footer"));
-        return new FooterProperties(element.getSize().getHeight(), element.getSize().getWidth(), element.getLocation());
+        int width = element.getSize().getWidth();
+        int height = element.getSize().getHeight();
+        int x = element.getLocation().x;
+        int y = 842 - height;
+        return new FooterProperties(x, y, width, height);
     }
 
     private byte[] renderPdf(final String data, WebDriver driver) {

@@ -48,8 +48,13 @@ public class PdfGenerationController {
     }
 
     @PostMapping("/footer/text")
-    public ResponseEntity<byte[]> extractFooterText(@RequestBody String html) {
-        return new ResponseEntity<>(pdfRenderComponent., pdfContentTypeHeader(), OK);
+    public ResponseEntity<String> extractFooterText(@RequestBody String html) {
+        return new ResponseEntity<>(pdfService.extractFooterText(html), OK);
+    }
+
+    @PostMapping("/test")
+    public ResponseEntity<byte[]> footerAsImage(@RequestBody String html) {
+        return new ResponseEntity<>(pdfService.html2pdf(html), pdfContentTypeHeader(), OK);
     }
 
     @PostMapping("/main")
@@ -60,6 +65,12 @@ public class PdfGenerationController {
     private HttpHeaders pdfContentTypeHeader() {
         HttpHeaders httpHeaders = new HttpHeaders();
         httpHeaders.setContentType(MediaType.APPLICATION_PDF);
+        return httpHeaders;
+    }
+
+    private HttpHeaders jpegContentTypeHeader() {
+        HttpHeaders httpHeaders = new HttpHeaders();
+        httpHeaders.setContentType(MediaType.IMAGE_PNG);
         return httpHeaders;
     }
 }
