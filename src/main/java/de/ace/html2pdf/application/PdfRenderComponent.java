@@ -18,13 +18,13 @@ import org.openqa.selenium.support.ui.WebDriverWait;
 import org.springframework.stereotype.Component;
 import org.yaml.snakeyaml.util.UriEncoder;
 
-import java.io.ByteArrayOutputStream;
-import java.io.IOException;
 import java.net.URI;
 import java.time.Duration;
 import java.util.Optional;
 
+import static de.ace.html2pdf.model.Constants.IMAGE_HEIGHT;
 import static java.util.Base64.getDecoder;
+import static java.util.Optional.ofNullable;
 
 @Component
 @RequiredArgsConstructor
@@ -33,30 +33,11 @@ public class PdfRenderComponent {
 
     private final ApplicationValuesConfig config;
 
-    /**
-     * @param html                  HTML data of website
-     * @param byteArrayOutputStream Output of rendering
-     * @return Footer if available
-     */
-    public Optional<Element> render(String html, ByteArrayOutputStream byteArrayOutputStream) throws IOException {
-        Document document = Jsoup.parse(html);
-        Optional<Element> footer = extractFooterTag(document);
-
-        byteArrayOutputStream.write(renderPdf(document.toString(), createRemoteDriver(config.getPath())));
-        return footer;
-    }
-
-    private Optional<Element> extractFooterTag(Document document) {
-        var footer = document.getElementsByTag("footer").stream().findFirst();
-        document.getElementsByTag("footer").clear();
-        return footer;
-    }
-
     public PdfData parseHtmlToPdf(final String html) {
         var driver = createRemoteDriver(config.getPath());
         String footerHtml = clearBesidesFooter(html);
         FooterProperties footerProperties = calculateFooterProperties(html, driver);
-        String mainHtml = addMarginStyle(clearFooter(html), footerProperties.height());
+        String mainHtml = addMarginStyle(clearFooter(html), footerProperties.getHtmlHeight());
         var pdfData = PdfData.builder()
                 .mainBytes(renderPdf(mainHtml, driver))
                 .footerBytes(renderPdf(footerHtml, driver))
@@ -71,7 +52,7 @@ public class PdfRenderComponent {
         Element styleTag = doc.selectFirst("style");
         if (styleTag != null) {
             String existingStyle = styleTag.html();
-            String newStyle = String.format("\n@page { margin-bottom: %dpx }", footerHeight);
+            String newStyle = String.format("\n@page { margin-bottom: %dpx }", footerHeight + 48); //1 inch = 96 css px, pdf default margin is 0.5 inch
             String combinedStyle = existingStyle + newStyle;
             styleTag.text(combinedStyle);
         }
@@ -86,19 +67,21 @@ public class PdfRenderComponent {
 
     private String clearBesidesFooter(final String html) {
         var document = Jsoup.parse(html);
-        Elements footerSiblings = document.selectFirst("footer").siblingElements();
-        footerSiblings.clear();
+        Optional<Elements> footerSiblings = ofNullable(document.selectFirst("footer")).map(Element::siblingElements);
+        footerSiblings.ifPresent(Elements::clear);
         return document.outerHtml();
     }
 
     private FooterProperties calculateFooterProperties(String html, final WebDriver driver) {
         driver.get("data:text/html," + UriEncoder.encode(html));
         WebElement element = driver.findElement(By.tagName("footer"));
-        int width = element.getSize().getWidth();
-        int height = element.getSize().getHeight();
+        int htmlWidth = element.getSize().getWidth();
+        int htmlHeight = element.getSize().getHeight();
+        int width = (int) Math.round((double) htmlWidth * 3.2); // 3.2 = X dimensions difference coefficient
+        int height = (int) Math.round((double) htmlHeight * 3.65); //3.65 = Y dimensions difference coefficient
         int x = element.getLocation().x;
-        int y = 842 - height;
-        return new FooterProperties(x, y, width, height);
+        int y = IMAGE_HEIGHT - height;
+        return new FooterProperties(x, y, width, height, htmlWidth, htmlHeight);
     }
 
     private byte[] renderPdf(final String data, WebDriver driver) {

@@ -1,32 +1,27 @@
 package de.ace.html2pdf.application;
 
 
-import de.ace.html2pdf.config.DavidPDFException;
+import de.ace.html2pdf.model.FooterImageProperties;
 import de.ace.html2pdf.model.FooterProperties;
 import de.ace.html2pdf.model.PdfData;
-import de.ace.html2pdf.model.PdfRequest;
-import io.github.jonathanlink.PDFLayoutTextStripper;
 import lombok.RequiredArgsConstructor;
 import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
 
-import org.apache.pdfbox.io.RandomAccessBufferedFileInputStream;
-import org.apache.pdfbox.pdfparser.PDFParser;
 import org.apache.pdfbox.pdmodel.PDDocument;
 import org.apache.pdfbox.pdmodel.PDPage;
 import org.apache.pdfbox.pdmodel.PDPageContentStream;
 import org.apache.pdfbox.pdmodel.graphics.image.PDImageXObject;
 import org.apache.pdfbox.rendering.PDFRenderer;
-import org.apache.pdfbox.text.PDFTextStripper;
 import org.springframework.stereotype.Service;
 
 import javax.imageio.ImageIO;
 import java.awt.*;
 import java.awt.image.BufferedImage;
-import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
-import java.io.FileNotFoundException;
 import java.io.IOException;
+
+import static de.ace.html2pdf.model.Constants.IMAGE_HEIGHT;
 
 @Service
 @Slf4j
@@ -34,38 +29,6 @@ import java.io.IOException;
 public class PdfService {
 
     private final PdfRenderComponent pdfRenderComponent;
-    private final PostProcessorPdfComponent postProcessorPdfComponent;
-
-    public byte[] convert(PdfRequest pdfRequest) {
-        try (ByteArrayOutputStream bs = new ByteArrayOutputStream()) {
-
-            var footerElement = pdfRenderComponent.render(pdfRequest.html(), bs);
-            return postProcessorPdfComponent.attachFooter(footerElement, pdfRequest.footerStyle(), bs);
-
-        } catch (Exception e) {
-            throw DavidPDFException.Type.CORRUPTED_STREAM.boom(e);
-        }
-    }
-
-    @SneakyThrows
-    public String extractFooterText(String html) {
-        PdfData pdfData = pdfRenderComponent.parseHtmlToPdf(html);
-        var bais = new ByteArrayInputStream(pdfData.getFooterBytes());
-        try {
-            PDFParser pdfParser = new PDFParser(new RandomAccessBufferedFileInputStream(bais));
-            pdfParser.parse();
-            PDDocument pdDocument = new PDDocument(pdfParser.getDocument());
-            PDFTextStripper pdfTextStripper = new PDFLayoutTextStripper();
-            String result = pdfTextStripper.getText(pdDocument);
-            System.out.println(result);
-            return result;
-        } catch (FileNotFoundException e) {
-            e.printStackTrace();
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
-        return "error";
-    }
 
     @SneakyThrows
     public byte[] html2pdf(String html) {
@@ -86,10 +49,11 @@ public class PdfService {
         try (PDDocument footerDoc = PDDocument.load(footerBytes)) {
             var pdfRenderer = new PDFRenderer(footerDoc);
             pdfRenderer.setImageDownscalingOptimizationThreshold(0);
-            var image = pdfRenderer.renderImage(0, 1);
-            log.info("image: {}", image.getWidth());
-            var clipped = image.getSubimage(fp.x(), fp.y(), fp.width(), fp.height());
-            return toByteArray(flipImageVertically(clipped), "png");
+            var image = pdfRenderer.renderImageWithDPI(0, 300);
+            var clipped = image.getSubimage(fp.getX(), fp.getY(), fp.getWidth(), fp.getHeight());
+            FooterImageProperties footerImageProperties = new FooterImageProperties(clipped.getWidth(), clipped.getHeight());
+            fp.setFooterImageProperties(footerImageProperties);
+            return toPngByteArray(flipImageVertically(clipped));
         }
     }
 
@@ -98,20 +62,15 @@ public class PdfService {
         PDPage page = document.getPage(pageNumber);
         PDImageXObject pdImage = PDImageXObject.createFromByteArray(document, imageBytes, "footerImage");
         try (PDPageContentStream contents = new PDPageContentStream(document, page, PDPageContentStream.AppendMode.APPEND, false)) {
-            contents.drawImage(pdImage, fp.x(), fp.y());
+            int y = IMAGE_HEIGHT - fp.getFooterImageProperties().height();
+            contents.drawImage(pdImage, 0, y);
         }
     }
 
-
-    private PDImageXObject getPrintingImage(PDDocument sourceDocument, PDDocument targetDocument, String imageName) throws IOException {
-        BufferedImage image = new PDFRenderer(sourceDocument).renderImage(0);
-        return PDImageXObject.createFromByteArray(targetDocument, toByteArray(image, "png"), imageName);
-    }
-
-    private static byte[] toByteArray(BufferedImage bi, String format)
+    private static byte[] toPngByteArray(BufferedImage bi)
             throws IOException {
         ByteArrayOutputStream baos = new ByteArrayOutputStream();
-        ImageIO.write(bi, format, baos);
+        ImageIO.write(bi, "png", baos);
         return baos.toByteArray();
     }
 

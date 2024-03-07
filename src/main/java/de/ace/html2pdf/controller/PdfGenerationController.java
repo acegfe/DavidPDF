@@ -3,7 +3,6 @@ package de.ace.html2pdf.controller;
 import de.ace.html2pdf.application.PdfRenderComponent;
 import de.ace.html2pdf.application.PdfService;
 import de.ace.html2pdf.config.DavidPDFException;
-import de.ace.html2pdf.model.PdfRequest;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpHeaders;
@@ -33,44 +32,28 @@ public class PdfGenerationController {
     }
 
     @PostMapping("/html")
-    public ResponseEntity<byte[]> generatePdfHtml(@RequestBody PdfRequest pdfRequest) {
+    public ResponseEntity<byte[]> generatePdfHtml(@RequestBody String html) {
         try {
-            return new ResponseEntity<>(pdfService.convert(pdfRequest),
-                    pdfContentTypeHeader(), OK);
+            return new ResponseEntity<>(pdfService.html2pdf(html), pdfContentTypeHeader(), OK);
         } catch (DavidPDFException e) {
             return ResponseEntity.status(418).body(e.getMessage().getBytes(StandardCharsets.UTF_8));
         }
     }
 
-    @PostMapping("/footer")
-    public ResponseEntity<byte[]> extractFooter(@RequestBody String html) {
-        return new ResponseEntity<>(pdfRenderComponent.parseHtmlToPdf(html).getFooterBytes(), pdfContentTypeHeader(), OK);
-    }
-
-    @PostMapping("/footer/text")
-    public ResponseEntity<String> extractFooterText(@RequestBody String html) {
-        return new ResponseEntity<>(pdfService.extractFooterText(html), OK);
-    }
-
-    @PostMapping("/test")
-    public ResponseEntity<byte[]> footerAsImage(@RequestBody String html) {
-        return new ResponseEntity<>(pdfService.html2pdf(html), pdfContentTypeHeader(), OK);
-    }
-
-    @PostMapping("/main")
+    @PostMapping("/main") //Debug
     public ResponseEntity<byte[]> merge(@RequestBody String html) {
         return new ResponseEntity<>(pdfRenderComponent.parseHtmlToPdf(html).getMainBytes(), pdfContentTypeHeader(), OK);
     }
 
-    private HttpHeaders pdfContentTypeHeader() {
+    @PostMapping("/footer") //Debug
+    public ResponseEntity<byte[]> extractFooter(@RequestBody String html) {
+        return new ResponseEntity<>(pdfRenderComponent.parseHtmlToPdf(html).getFooterBytes(), pdfContentTypeHeader(), OK);
+    }
+
+    private static HttpHeaders pdfContentTypeHeader() {
         HttpHeaders httpHeaders = new HttpHeaders();
         httpHeaders.setContentType(MediaType.APPLICATION_PDF);
         return httpHeaders;
     }
 
-    private HttpHeaders jpegContentTypeHeader() {
-        HttpHeaders httpHeaders = new HttpHeaders();
-        httpHeaders.setContentType(MediaType.IMAGE_PNG);
-        return httpHeaders;
-    }
 }
