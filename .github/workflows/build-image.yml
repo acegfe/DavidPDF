@@ -1,0 +1,44 @@
+name:  A job to create Docker Image
+
+env:
+  JAVA_VERSION: '21'  
+
+on:
+  push:
+    branches:
+      - '*'
+  pull_request:
+    branches:
+      - '*'
+
+jobs:
+  build:
+    name: Build and push docker image
+    runs-on: ubuntu-latest
+    
+    steps:
+      - run: echo "The job is triggered by the branch ${{ GITHUB_REF_NAME }}, the event ${{ GITHUB_EVENT_NAME }}  and initiated by ${{ GITHUB_ACTOR }}"
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Set up Java version
+        uses: actions/setup-java@v4
+        with:
+          java-version: ${{ JAVA_VERSION }}
+          distribution: 'oracle'
+          cache: 'maven'
+          server-id: github
+
+      - name: Install Docker
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y docker.io
+
+      - name: Build JAR with Maven
+        run: mvn clean package
+
+      - name: Build image with docker
+        run: |
+          cd src/infra
+          docker build -t ${{ IMAGE_NAME }}:${{ VERSION }} -f .
+          docker images
