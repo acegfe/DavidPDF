@@ -1,4 +1,4 @@
-name:  A job to create Docker Image
+name:  Create Docker Image
 
 env:
   JAVA_VERSION: '21' 
@@ -13,7 +13,6 @@ jobs:
     runs-on: ubuntu-latest
     
     steps:
-      - run: echo "The job is triggered by the branch ${{ github.ref }} and initiated by ${{ github.actor }}"
       - name: Checkout code
         uses: actions/checkout@v4
 
@@ -23,11 +22,6 @@ jobs:
           java-version: ${{ env.JAVA_VERSION }}
           distribution: 'temurin'
           server-id: github
-
-      - name: Install Docker
-        run: |
-          sudo apt-get update
-          sudo apt-get install -y docker.io
 
       - name: Build JAR with Maven
         run: mvn clean package
