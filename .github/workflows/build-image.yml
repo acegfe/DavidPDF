@@ -1,7 +1,9 @@
 name:  A job to create Docker Image
 
 env:
-  JAVA_VERSION: '21'  
+  JAVA_VERSION: '21' 
+  IMAGE_NAME: 'Pdf_Generator'
+  VERSION: 'v1.0.0'
 
 on: [push]
 
@@ -11,14 +13,14 @@ jobs:
     runs-on: ubuntu-latest
     
     steps:
-      - run: echo "The job is triggered by the branch ${{ GITHUB_REF_NAME }}, the event ${{ GITHUB_EVENT_NAME }}  and initiated by ${{ GITHUB_ACTOR }}"
+      - run: echo "The job is triggered by the branch ${{ github.ref }} and initiated by ${{ github.actor }}"
       - name: Checkout code
         uses: actions/checkout@v4
 
       - name: Set up Java version
         uses: actions/setup-java@v4
         with:
-          java-version: ${{ JAVA_VERSION }}
+          java-version: ${{ env.JAVA_VERSION }}
           distribution: 'oracle'
           cache: 'maven'
           server-id: github
@@ -34,5 +36,5 @@ jobs:
       - name: Build image with docker
         run: |
           cd src/infra
-          docker build -t ${{ IMAGE_NAME }}:${{ VERSION }} -f .
+          docker build -t ${{ env.IMAGE_NAME }}:${{ env.VERSION }} -f .
           docker images
