@@ -2,7 +2,7 @@ name:  Create Docker Image
 
 env:
   JAVA_VERSION: '21' 
-  IMAGE_NAME: 'Pdf_Generator'
+  IMAGE_NAME: 'pdf_generator'
   VERSION: 'v1.0.0'
 
 on: [push]
