@@ -3,7 +3,7 @@ name:  A job to create Docker Image
 env:
   JAVA_VERSION: '21'  
 
-on: workflow_dispatch
+on: [push]
 
 jobs:
   build:
