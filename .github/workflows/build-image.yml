@@ -21,8 +21,7 @@ jobs:
         uses: actions/setup-java@v4
         with:
           java-version: ${{ env.JAVA_VERSION }}
-          distribution: 'oracle'
-          cache: 'maven'
+          distribution: 'temurin'
           server-id: github
 
       - name: Install Docker
