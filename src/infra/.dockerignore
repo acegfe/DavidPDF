@@ -1,0 +1,8 @@
+.github/**
+src/main/**
+target/**
+!target/*.jar
+.gitignore
+chromedriver
+pom.xml
+README.md
