@@ -30,8 +30,7 @@ public class PdfService {
 
     private final PdfRenderComponent pdfRenderComponent;
 
-    @SneakyThrows
-    public byte[] html2pdf(String html) {
+    public byte[] html2pdf(String html) throws IOException {
         PdfData pdfData = pdfRenderComponent.parseHtmlToPdf(html);
         byte[] clippedFootedBytes = clipFooter(pdfData.footerBytes(), pdfData.footerProperties());
         try (PDDocument mainDoc = PDDocument.load(pdfData.mainBytes());
@@ -44,8 +43,7 @@ public class PdfService {
         }
     }
 
-    @SneakyThrows
-    private byte[] clipFooter(byte[] footerBytes, FooterProperties fp) {
+    private byte[] clipFooter(byte[] footerBytes, FooterProperties fp) throws IOException {
         try (PDDocument footerDoc = PDDocument.load(footerBytes)) {
             var pdfRenderer = new PDFRenderer(footerDoc);
             pdfRenderer.setImageDownscalingOptimizationThreshold(0);
@@ -57,8 +55,7 @@ public class PdfService {
         }
     }
 
-    @SneakyThrows
-    private void drawFooterOnPage(PDDocument document, int pageNumber, byte[] imageBytes, FooterProperties fp) {
+    private void drawFooterOnPage(PDDocument document, int pageNumber, byte[] imageBytes, FooterProperties fp) throws IOException {
         PDPage page = document.getPage(pageNumber);
         PDImageXObject pdImage = PDImageXObject.createFromByteArray(document, imageBytes, "footerImage");
         try (PDPageContentStream contents = new PDPageContentStream(document, page, PDPageContentStream.AppendMode.APPEND, false)) {
@@ -66,6 +63,7 @@ public class PdfService {
             contents.drawImage(pdImage, 0, y);
         }
     }
+
 
     private static byte[] toPngByteArray(BufferedImage bi)
             throws IOException {
