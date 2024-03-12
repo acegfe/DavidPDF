@@ -1,7 +1,7 @@
 package de.ace.html2pdf.application;
 
 import de.ace.html2pdf.config.ApplicationValuesConfig;
-import de.ace.html2pdf.config.DavidPDFException;
+import de.ace.html2pdf.config.exception.PdfException;
 import de.ace.html2pdf.model.FooterProperties;
 import de.ace.html2pdf.model.PdfData;
 import lombok.RequiredArgsConstructor;
@@ -22,7 +22,7 @@ import java.net.URI;
 import java.time.Duration;
 import java.util.Optional;
 
-import static de.ace.html2pdf.model.Constants.IMAGE_HEIGHT;
+import static de.ace.html2pdf.config.Constants.IMAGE_HEIGHT;
 import static java.util.Base64.getDecoder;
 import static java.util.Optional.ofNullable;
 
@@ -38,11 +38,7 @@ public class PdfRenderComponent {
         String footerHtml = clearBesidesFooter(html);
         FooterProperties footerProperties = calculateFooterProperties(html, driver);
         String mainHtml = addMarginStyle(clearFooter(html), footerProperties.getHtmlHeight());
-        var pdfData = PdfData.builder()
-                .mainBytes(renderPdf(mainHtml, driver))
-                .footerBytes(renderPdf(footerHtml, driver))
-                .footerProperties(footerProperties)
-                .build();
+        PdfData pdfData = new PdfData(renderPdf(mainHtml, driver), renderPdf(footerHtml, driver), footerProperties);
         driver.quit();
         return pdfData;
     }
@@ -103,7 +99,7 @@ public class PdfRenderComponent {
         try {
             return new RemoteWebDriver(new URI(url).toURL(), chromeOptions);
         } catch (Exception e) {
-            throw DavidPDFException.Type.UNABLE_TO_WEBDRIVER.boom(e);
+            throw PdfException.Type.UNABLE_TO_WEBDRIVER.boom(e);
         }
     }
 }

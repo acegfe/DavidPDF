@@ -21,7 +21,7 @@ import java.awt.image.BufferedImage;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 
-import static de.ace.html2pdf.model.Constants.IMAGE_HEIGHT;
+import static de.ace.html2pdf.config.Constants.IMAGE_HEIGHT;
 
 @Service
 @Slf4j
@@ -33,11 +33,11 @@ public class PdfService {
     @SneakyThrows
     public byte[] html2pdf(String html) {
         PdfData pdfData = pdfRenderComponent.parseHtmlToPdf(html);
-        byte[] clippedFootedBytes = clipFooter(pdfData.getFooterBytes(), pdfData.getFooterProperties());
-        try (PDDocument mainDoc = PDDocument.load(pdfData.getMainBytes());
+        byte[] clippedFootedBytes = clipFooter(pdfData.footerBytes(), pdfData.footerProperties());
+        try (PDDocument mainDoc = PDDocument.load(pdfData.mainBytes());
              ByteArrayOutputStream baos = new ByteArrayOutputStream()) {
             for (int pageNumber = 0; pageNumber < mainDoc.getPages().getCount(); ++pageNumber) {
-                drawFooterOnPage(mainDoc, pageNumber, clippedFootedBytes, pdfData.getFooterProperties());
+                drawFooterOnPage(mainDoc, pageNumber, clippedFootedBytes, pdfData.footerProperties());
             }
             mainDoc.save(baos);
             return baos.toByteArray();

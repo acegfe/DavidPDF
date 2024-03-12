@@ -1,13 +1,5 @@
 package de.ace.html2pdf.model;
 
-import lombok.Builder;
-import lombok.Data;
+public record PdfData(byte[] mainBytes, byte[] footerBytes, FooterProperties footerProperties) {
 
-@Data
-@Builder
-public class PdfData {
-
-    private byte[] mainBytes;
-    private byte[] footerBytes;
-    private FooterProperties footerProperties;
 }
