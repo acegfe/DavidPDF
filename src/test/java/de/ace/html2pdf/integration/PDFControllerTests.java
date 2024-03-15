@@ -1,8 +1,11 @@
 package de.ace.html2pdf.integration;
 
+import static org.assertj.core.api.Assertions.assertThat;
+
 import de.ace.html2pdf.config.ApplicationValuesConfig;
-import org.junit.Test;
+import de.ace.html2pdf.controller.PdfGenerationController;
 import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.Test;
 import org.openqa.selenium.chrome.ChromeOptions;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
@@ -27,11 +30,16 @@ public class PDFControllerTests {
   private MockMvc mockMvc;
 
   @Autowired
+  PdfGenerationController controller;
+
+
+  @Autowired
   private ApplicationContext applicationContext;
 
   static ApplicationValuesConfig config;
 
- private static final DockerImageName IMAGENAME = DockerImageName.parse("seleniarm/standalone-chromium:latest").asCompatibleSubstituteFor("selenium/standalone-chrome");
+ private static final DockerImageName IMAGENAME = DockerImageName.parse("seleniarm/standalone-chromium:latest")
+     .asCompatibleSubstituteFor("selenium/standalone-chrome");
 
  @Container
   private static final BrowserWebDriverContainer<?> chromeContainer = new BrowserWebDriverContainer<>(IMAGENAME)
