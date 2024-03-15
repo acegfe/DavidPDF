@@ -2,6 +2,7 @@ package de.ace.html2pdf.controller;
 
 import de.ace.html2pdf.application.PdfRenderComponent;
 import de.ace.html2pdf.application.PdfService;
+import java.io.IOException;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpHeaders;
@@ -29,7 +30,7 @@ public class PdfGenerationController {
     }
 
     @PostMapping("/html")
-    public ResponseEntity<byte[]> generatePdfHtml(@RequestBody String html) {
+    public ResponseEntity<byte[]> generatePdfHtml(@RequestBody String html) throws IOException {
         return new ResponseEntity<>(pdfService.html2pdf(html), pdfContentTypeHeader(), OK);
     }
 

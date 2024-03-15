@@ -1,27 +1,24 @@
-import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.Mockito.when;
+package de.ace.html2pdf.integration;
 
-import de.ace.html2pdf.MagicApplication;
-import de.ace.html2pdf.application.PdfRenderComponent;
-import de.ace.html2pdf.application.PdfService;
 import de.ace.html2pdf.config.ApplicationValuesConfig;
-import org.junit.Assert;
-import org.junit.Rule;
 import org.junit.Test;
+import org.junit.jupiter.api.Assertions;
 import org.openqa.selenium.chrome.ChromeOptions;
-import org.openqa.selenium.remote.RemoteWebDriver;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.context.ApplicationContext;
+import org.springframework.test.context.DynamicPropertyRegistry;
+import org.springframework.test.context.DynamicPropertySource;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
 import org.springframework.test.web.servlet.result.MockMvcResultMatchers;
 import org.testcontainers.containers.BrowserWebDriverContainer;
-import org.testcontainers.containers.wait.strategy.Wait;
+import org.testcontainers.junit.jupiter.Container;
 import org.testcontainers.junit.jupiter.Testcontainers;
 import org.testcontainers.utility.DockerImageName;
 
-@SpringBootTest(classes = MagicApplication.class)
+@SpringBootTest
 @AutoConfigureMockMvc
 @Testcontainers
 public class PDFControllerTests {
@@ -30,22 +27,27 @@ public class PDFControllerTests {
   private MockMvc mockMvc;
 
   @Autowired
-  ApplicationValuesConfig config;
+  private ApplicationContext applicationContext;
 
-  @Autowired
-  PdfService pdfService;
+  static ApplicationValuesConfig config;
 
-  @Autowired
-  PdfRenderComponent pdfRenderComponent;
-  final DockerImageName IMAGENAME = DockerImageName.parse("seleniarm/standalone-chromium:latest").asCompatibleSubstituteFor("selenium/standalone-chrome");
+ private static final DockerImageName IMAGENAME = DockerImageName.parse("seleniarm/standalone-chromium:latest").asCompatibleSubstituteFor("selenium/standalone-chrome");
 
-    @Rule
-    public BrowserWebDriverContainer<?> chromeContainer = new BrowserWebDriverContainer<>(IMAGENAME)
-        .withCapabilities(new ChromeOptions());
+ @Container
+  private static final BrowserWebDriverContainer<?> chromeContainer = new BrowserWebDriverContainer<>(IMAGENAME)
+        .withCapabilities(new ChromeOptions().addArguments("--headless", "--no-sandbox"));
 
+  @DynamicPropertySource
+  static void registerDynamicProperties(DynamicPropertyRegistry registry) {
+    registry.add(config.getPath(), () -> "http://" + chromeContainer.getHost() + ":" + chromeContainer.getMappedPort(4444));
+  }
 
-    @Test
-    public void checkIfDriverCreated() throws Exception {
+  @Test
+  public void testMockMvcBeanExists() {
+    Assertions.assertNotNull(applicationContext.getBean(MockMvc.class));
+  }
+
+    public void givenHTML_whenAPIIsCalled_thenReturnPDF() throws Exception {
       String html="<!DOCTYPE html>\n"
           + "<html lang=\"en\">\n"
           + "<head>\n"
@@ -65,14 +67,11 @@ public class PDFControllerTests {
           + "    </footer>\n"
           + "</body>\n"
           + "</html>\n";
-      RemoteWebDriver driver = new RemoteWebDriver(chromeContainer.getSeleniumAddress(),
-          new ChromeOptions().addArguments("--headless", "--no-sandbox"));
-      when(any(PdfRenderComponent.class).createRemoteDriver(config.getPath())).thenReturn(driver);
+
       mockMvc.perform(MockMvcRequestBuilders.post("/pdf/html")
               .content(html))
           .andExpect(MockMvcResultMatchers.status().isOk());
 
     }
-
 
 }
