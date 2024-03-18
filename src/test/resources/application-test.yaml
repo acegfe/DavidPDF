@@ -1,0 +1,5 @@
+security:
+  api:
+    key: prodkey
+selenium:
+  driver-path: ${dynamic.selenium.driver-path}
