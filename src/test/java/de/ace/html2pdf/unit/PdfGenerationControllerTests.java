@@ -27,7 +27,7 @@ public class PdfGenerationControllerTests {
   private MockMvc mockMvc;
 
   @MockBean
-  private PdfService pdfService;
+  private PdfService pdfService;static 
 
   @MockBean
   private PdfRenderComponent pdfRenderComponent;
