@@ -2,4 +2,5 @@ security:
   api:
     key: prodkey
 selenium:
-  driver-path: ${dynamic.selenium.driver-path}
+  driver-path: ${selenium.driver-path}
+filePath: src/test/output/test.pdf
