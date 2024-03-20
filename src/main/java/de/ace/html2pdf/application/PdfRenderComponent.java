@@ -74,7 +74,7 @@ public class PdfRenderComponent {
         int htmlWidth = element.getSize().getWidth();
         int htmlHeight = element.getSize().getHeight();
         int width = (int) Math.round((double) htmlWidth * 3.2); // 3.2 = X dimensions difference coefficient
-        int height = (int) Math.round((double) htmlHeight * 3.65); //3.65 = Y dimensions difference coefficient
+        int height = (int) Math.round((double) htmlHeight * 3.65); // 3.65 = Y dimensions difference coefficient
         int x = element.getLocation().x;
         int y = IMAGE_HEIGHT - height;
         return new FooterProperties(x, y, width, height, htmlWidth, htmlHeight);
