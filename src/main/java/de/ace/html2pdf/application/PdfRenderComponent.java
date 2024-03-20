@@ -94,12 +94,12 @@ public class PdfRenderComponent {
         return getDecoder().decode(pdf.getContent());
     }
 
-    public RemoteWebDriver createRemoteDriver(String url) {
+    private RemoteWebDriver createRemoteDriver(String url) {
         ChromeOptions chromeOptions = new ChromeOptions().addArguments("--headless", "--no-sandbox");
         try {
             return new RemoteWebDriver(new URI(url).toURL(), chromeOptions);
         } catch (Exception e) {
-            throw PdfException.Type.UNABLE_TO_WEBDRIVER.boom(e);
+            throw PdfException.Type.UNABLE_TO_WEBDRIVER.pdfException(e);
         }
     }
 }

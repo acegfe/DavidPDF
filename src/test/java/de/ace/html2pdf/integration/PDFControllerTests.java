@@ -27,7 +27,6 @@ import org.testcontainers.utility.DockerImageName;
 
 @SpringBootTest
 @AutoConfigureMockMvc
-@ActiveProfiles("test")
 public class PDFControllerTests {
 
   @Autowired
@@ -62,7 +61,6 @@ public class PDFControllerTests {
   @Test
   public void givenHTML_whenAPIIsCalled_thenReturnPDF() throws Exception {
       String input = inputFile.getContentAsString(StandardCharsets.UTF_8);
-      System.out.println(webDriverPath);
       ResultActions resultActions = mockMvc.perform(post("/pdf/html")
             .content(input)
             .header("Authorization", "Bearer prodkey"))
