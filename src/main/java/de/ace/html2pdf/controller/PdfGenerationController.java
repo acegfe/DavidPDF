@@ -9,6 +9,8 @@ import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import java.io.IOException;
+
 import static org.springframework.http.HttpStatus.OK;
 
 /**
@@ -29,7 +31,7 @@ public class PdfGenerationController {
     }
 
     @PostMapping("/html")
-    public ResponseEntity<byte[]> generatePdfHtml(@RequestBody String html) {
+    public ResponseEntity<byte[]> generatePdfHtml(@RequestBody String html) throws IOException {
         return new ResponseEntity<>(pdfService.html2pdf(html), pdfContentTypeHeader(), OK);
     }
 
