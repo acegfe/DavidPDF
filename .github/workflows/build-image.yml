@@ -24,6 +24,8 @@ jobs:
           server-id: github
 
       - name: Build JAR with Maven
+        env: 
+          APIKEY: ${{ secrets.API_KEY }}
         run: mvn clean package
 
       - name: Build image with docker
