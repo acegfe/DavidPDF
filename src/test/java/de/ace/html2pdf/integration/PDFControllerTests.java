@@ -5,6 +5,8 @@ import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.header;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
+import java.io.BufferedOutputStream;
+import java.io.File;
 import java.io.FileOutputStream;
 import java.nio.charset.StandardCharsets;
 import org.junit.jupiter.api.BeforeAll;
@@ -64,14 +66,14 @@ public class PDFControllerTests {
       ResultActions resultActions = mockMvc.perform(post("/pdf/html")
             .content(input)
             .header("Authorization", "Bearer prodkey"))
-        .andDo(print())
         .andExpect(status().isOk())
         .andExpect(header().string("Content-Type", "application/pdf"));
       MvcResult mvcResult = resultActions.andReturn();
-      byte[] contentAsByteArray = mvcResult.getResponse().getContentAsByteArray();
-      try (FileOutputStream fos = new FileOutputStream(filePath)) {
-        fos.write(contentAsByteArray);
+      byte[] content = mvcResult.getResponse().getContentAsByteArray();
+    File file = new File(filePath);
+    file.createNewFile();
+    try (BufferedOutputStream bos = new BufferedOutputStream(new FileOutputStream(file))) {
+        bos.write(content);
       }
   }
-
 }
