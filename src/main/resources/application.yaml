@@ -2,7 +2,7 @@ server:
   port: '8080'
 security:
   api:
-    key: prodkey
+    key: ${{APIKEY}}
 spring:
   docker:
     compose:

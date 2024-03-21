@@ -1,6 +1,6 @@
 security:
   api:
-    key: prodkey
+    key: ${{APIKEY}}
 selenium:
   driver-path: ${selenium.driver-path}
 filePath: src/test/output/test.pdf
