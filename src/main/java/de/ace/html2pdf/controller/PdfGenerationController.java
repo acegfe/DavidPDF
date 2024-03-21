@@ -1,17 +1,18 @@
 package de.ace.html2pdf.controller;
 
+import de.ace.html2pdf.application.PdfRenderComponent;
 import de.ace.html2pdf.application.PdfService;
-import de.ace.html2pdf.config.DavidPDFException;
-import de.ace.html2pdf.model.PdfRequest;
+import java.io.IOException;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpHeaders;
-import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
-import java.nio.charset.StandardCharsets;
+import java.io.IOException;
+
+import static org.springframework.http.HttpStatus.OK;
 
 /**
  * To be used with Docker. This requires that you build, compile and use docker-compose
@@ -22,7 +23,8 @@ import java.nio.charset.StandardCharsets;
 @RequiredArgsConstructor
 public class PdfGenerationController {
 
-    public final PdfService pdfService;
+    private final PdfService pdfService;
+    private final PdfRenderComponent pdfRenderComponent;
 
     @GetMapping("/healthCheck")
     public ResponseEntity<String> healthCheck() {
@@ -30,18 +32,24 @@ public class PdfGenerationController {
     }
 
     @PostMapping("/html")
-    public ResponseEntity<byte[]> generatePdfHtml(@RequestBody PdfRequest pdfRequest) {
-        try {
-            return new ResponseEntity<>(pdfService.convert(pdfRequest),
-                    pdfContentTypeHeader(), HttpStatus.OK);
-        } catch (DavidPDFException e) {
-            return ResponseEntity.status(418).body(e.getMessage().getBytes(StandardCharsets.UTF_8));
-        }
+    public ResponseEntity<byte[]> generatePdfHtml(@RequestBody String html) throws IOException {
+        return new ResponseEntity<>(pdfService.html2pdf(html), pdfContentTypeHeader(), OK);
     }
 
-    private HttpHeaders pdfContentTypeHeader() {
+    @PostMapping("/main") //Debug
+    public ResponseEntity<byte[]> merge(@RequestBody String html) {
+        return new ResponseEntity<>(pdfRenderComponent.parseHtmlToPdf(html).mainBytes(), pdfContentTypeHeader(), OK);
+    }
+
+    @PostMapping("/footer") //Debug
+    public ResponseEntity<byte[]> extractFooter(@RequestBody String html) {
+        return new ResponseEntity<>(pdfRenderComponent.parseHtmlToPdf(html).footerBytes(), pdfContentTypeHeader(), OK);
+    }
+
+    private static HttpHeaders pdfContentTypeHeader() {
         HttpHeaders httpHeaders = new HttpHeaders();
         httpHeaders.setContentType(MediaType.APPLICATION_PDF);
         return httpHeaders;
     }
+
 }
