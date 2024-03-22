@@ -45,10 +45,10 @@ public class PdfService {
 
     private byte[] clipFooter(byte[] footerBytes, FooterProperties fp) throws IOException {
         try (PDDocument footerDoc = PDDocument.load(footerBytes)) {
-            var pdfRenderer = new PDFRenderer(footerDoc);
+            PDFRenderer pdfRenderer = new PDFRenderer(footerDoc);
             pdfRenderer.setImageDownscalingOptimizationThreshold(0);
-            var image = pdfRenderer.renderImageWithDPI(0, 300);
-            var clipped = image.getSubimage(fp.getX(), fp.getY(), fp.getWidth(), fp.getHeight());
+            BufferedImage image = pdfRenderer.renderImageWithDPI(0, 300);
+            BufferedImage clipped = image.getSubimage(fp.getX(), fp.getY(), fp.getWidth(), fp.getHeight());
             FooterImageProperties footerImageProperties = new FooterImageProperties(clipped.getWidth(), clipped.getHeight());
             fp.setFooterImageProperties(footerImageProperties);
             return toPngByteArray(flipImageVertically(clipped));
@@ -67,9 +67,10 @@ public class PdfService {
 
     private static byte[] toPngByteArray(BufferedImage bi)
             throws IOException {
-        ByteArrayOutputStream baos = new ByteArrayOutputStream();
-        ImageIO.write(bi, "png", baos);
-        return baos.toByteArray();
+        try (ByteArrayOutputStream baos = new ByteArrayOutputStream()) {
+            ImageIO.write(bi, "png", baos);
+            return baos.toByteArray();
+        }
     }
 
     public static BufferedImage flipImageVertically(final BufferedImage image) {
