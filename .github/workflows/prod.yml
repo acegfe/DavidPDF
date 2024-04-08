@@ -37,6 +37,11 @@ jobs:
           push: false
           tags: ${{ env.IMAGE_NAME }}:${{ github.sha }}
 
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+
       - name: Login to Jira
         uses: atlassian/gajira-login@v3
         env:
