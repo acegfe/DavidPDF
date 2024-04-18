@@ -1,11 +1,22 @@
-name:  Create Docker Image
+name: Create Docker Image
 
 env:
-  JAVA_VERSION: '21' 
+  JAVA_VERSION: '21'
   IMAGE_NAME: 'pdf_generator'
   VERSION: 'v1.0.0'
 
-on: [push]
+on:
+  push:
+    branches:
+      - 'master'
+      - 'main'
+      - 'releases/**'
+      - 'release/**'
+      - 'develop'
+      - 'feature/**'
+      - 'feat/**'
+      - 'hotfix/**'
+  workflow_dispatch:
 
 jobs:
   build:
@@ -24,7 +35,7 @@ jobs:
           server-id: github
 
       - name: Build JAR with Maven
-        env: 
+        env:
           APIKEY: ${{ secrets.API_KEY }}
         run: mvn clean package
 
@@ -38,3 +49,20 @@ jobs:
 
       - name: verify image creation
         run: docker images
+
+        #TODO: push image to the Azure Container Registry
+
+  deploy-dev:
+    needs: build
+    uses: acegfe/DavidPDF/tree/SW-78--CI/CD-workflow/.github/workflows/publish.yml
+    with:
+      environmentName: "Development"
+
+
+  #TODO: trigger workflow to stage environment
+
+  deploy-prod:
+    needs: deploy-dev
+    uses: acegfe/DavidPDF/tree/SW-78--CI/CD-workflow/.github/workflows/publish.yml
+    with:
+      environmentName: "Prod"

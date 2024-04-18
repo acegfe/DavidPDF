@@ -1,0 +1,21 @@
+name: Publish to Azure
+
+
+on:
+  workflow_call:
+    inputs:
+      environmentName:
+        description: The environment to deploy to
+        required: true
+        type: string
+
+jobs:
+  deploy:
+    name: Test the workflow
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Print the envName
+        run: echo  ${{ inputs.environmentName }}
+
+        #TODO: pull image from the registry and run pulumi scripts to deploy on sepcified env
