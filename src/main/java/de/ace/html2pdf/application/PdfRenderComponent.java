@@ -101,7 +101,7 @@ public class PdfRenderComponent {
         try {
             return new RemoteWebDriver(new URI(url).toURL(), chromeOptions);
         } catch (Exception e) {
-            throw PdfException.Type.UNABLE_TO_WEBDRIVER.pdfException(e);
+            throw PdfException.Type.UNABLE_TO_WEBDRIVER.boom(e);
         }
     }
 }
