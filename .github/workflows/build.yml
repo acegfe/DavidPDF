@@ -47,5 +47,10 @@ jobs:
     with:
       environmentName: "Development"
 
-
   #TODO: trigger workflow to stage environment
+
+  deploy-prod:
+    needs: deploy-dev
+    uses: ./.github/workflows/publish.yml
+    with:
+      environmentName: "Prod"
