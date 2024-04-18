@@ -43,6 +43,7 @@ jobs:
 
   deploy-dev:
     needs: build
+    name: Deploy to the Development Environment
     uses: ./.github/workflows/publish.yml
     with:
       environmentName: "Development"
@@ -51,6 +52,7 @@ jobs:
 
   deploy-prod:
     needs: deploy-dev
+    name: Deploy to the Prod Environment
     uses: ./.github/workflows/publish.yml
     with:
       environmentName: "Prod"
