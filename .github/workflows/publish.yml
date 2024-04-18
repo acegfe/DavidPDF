@@ -11,7 +11,7 @@ on:
 
 jobs:
   deploy:
-    name: Test the workflow
+    name: Deploy to the ${{ inputs.environmentName }} Environment
     runs-on: ubuntu-latest
     environment:
       name: ${{ inputs.environmentName }}
