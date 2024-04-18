@@ -5,19 +5,7 @@ env:
   IMAGE_NAME: 'pdf_generator'
   VERSION: 'v1.0.0'
 
-on:
-  push:
-    branches:
-      - 'SW*'
-      - 'master'
-      - 'main'
-      - 'releases/**'
-      - 'release/**'
-      - 'develop'
-      - 'feature/**'
-      - 'feat/**'
-      - 'hotfix/**'
-  workflow_dispatch:
+on: [push]
 
 jobs:
   build:
