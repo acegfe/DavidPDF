@@ -13,6 +13,8 @@ jobs:
   deploy:
     name: Test the workflow
     runs-on: ubuntu-latest
+    environment:
+      name: ${{ inputs.environmentName }}
 
     steps:
       - name: Print the envName
