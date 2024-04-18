@@ -23,6 +23,7 @@ import java.time.Duration;
 import java.util.Optional;
 
 import static de.ace.html2pdf.config.Constants.IMAGE_HEIGHT;
+import static de.ace.html2pdf.config.Constants.PDF_DEFAULT_PADDING;
 import static java.util.Base64.getDecoder;
 import static java.util.Optional.ofNullable;
 
@@ -48,7 +49,7 @@ public class PdfRenderComponent {
         Element styleTag = doc.selectFirst("style");
         if (styleTag != null) {
             String existingStyle = styleTag.html();
-            String newStyle = String.format("\n@page { margin-bottom: %dpx }", footerHeight + 48); //1 inch = 96 css px, pdf default margin is 0.5 inch
+            String newStyle = String.format("\n@page { margin-bottom: %dpx }", footerHeight + PDF_DEFAULT_PADDING); //1 inch = 96 css px, pdf default margin is 0.5 inch
             String combinedStyle = existingStyle + newStyle;
             styleTag.text(combinedStyle);
         }
@@ -76,7 +77,8 @@ public class PdfRenderComponent {
         int width = (int) Math.round((double) htmlWidth * 3.2); // 3.2 = X dimensions difference coefficient
         int height = (int) Math.round((double) htmlHeight * 3.65); // 3.65 = Y dimensions difference coefficient
         int x = element.getLocation().x;
-        int y = IMAGE_HEIGHT - height;
+        int y = IMAGE_HEIGHT - height - PDF_DEFAULT_PADDING;
+        width -= x;
         return new FooterProperties(x, y, width, height, htmlWidth, htmlHeight);
     }
 
