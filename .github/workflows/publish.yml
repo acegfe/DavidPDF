@@ -7,10 +7,6 @@ on:
         description: The environment to deploy to
         required: true
         type: string
-      branchName:
-        type: string
-        description: The branch on which the workflow was triggered
-        required: true
 
 jobs:
   deploy:
@@ -18,10 +14,9 @@ jobs:
     runs-on: ubuntu-latest
     environment:
       name: ${{ inputs.environmentName }}
-
     steps:
       - name: Print the envName and branch name
-        run: echo "${{ inputs.environmentName }} ${{ inputs.branchName }}"
+        run: echo "${{ inputs.environmentName }}"
 
 
 
