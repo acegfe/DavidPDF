@@ -9,7 +9,6 @@ on:
       - 'release/**'
 
 env:
-  BRANCH: ${{ github.ref == 'refs/heads/SW-78--CI/CD-workflow' &&  'master' || 'release' }}
   IMAGE_NAME: 'pdf_generator'
   VERSION: 'v1.0.0'
 
@@ -50,7 +49,7 @@ jobs:
     uses: ./.github/workflows/publish.yml
     with:
       environmentName: "Development"
-      branchName: ${{ env.BRANCH }}
+      branchName: ${{ github.ref }}
 
   deploy-stage:
     name: Stage Deployment
@@ -58,7 +57,7 @@ jobs:
     uses: ./.github/workflows/publish.yml
     with:
       environmentName: "Staging"
-      branchName: ${{ env.BRANCH }}
+      branchName: ${{ github.ref }}
 
   deploy-prod:
     name: Prod Deployment
@@ -66,4 +65,4 @@ jobs:
     uses: ./.github/workflows/publish.yml
     with:
       environmentName: "Production"
-      branchName: ${{ env.BRANCH }}
+      branchName: ${{ github.ref }}
