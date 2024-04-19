@@ -19,7 +19,7 @@ jobs:
     runs-on: ubuntu-latest
     environment:
       name: ${{ inputs.environmentName }}
-    if: ( ${{ inputs.branchName }} == 'refs/heads/master' && ${{ inputs.environment }} == 'Development' ) ||
+    if: ( ${{ inputs.branchName }} == 'refs/heads/SW' && ${{ inputs.environment }} == 'Development' ) ||
       ( ${{ inputs.branchName }} == 'refs/heads/release' && (${{ inputs.environment }} == 'Staging' || ${{ inputs.environment }} == 'Production' )
     steps:
       - name: Print the envName and branch name
