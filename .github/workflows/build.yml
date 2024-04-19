@@ -18,28 +18,8 @@ jobs:
     runs-on: ubuntu-latest
     
     steps:
-      - name: Checkout code
-        uses: actions/checkout@v4
-
-      - name: Set up Java version
-        uses: actions/setup-java@v4
-        with:
-          java-version: 21
-          distribution: 'temurin'
-          server-id: github
-
-      - name: Build JAR with Maven
-        env:
-          APIKEY: ${{ secrets.API_KEY }}
-        run: mvn clean package
-
-      - name: Build image with docker
-        uses: docker/build-push-action@v5
-        with:
-          context: .
-          file: ./src/infra/Dockerfile
-          push: false
-          tags: ${{ env.IMAGE_NAME }}:${{ github.sha }}
+      - name: Print
+        run: echo "You are in Build phase"
 
         #TODO: push image to the Azure Container Registry
 
