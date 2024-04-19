@@ -18,7 +18,7 @@ jobs:
     runs-on: ubuntu-latest
     environment:
       name: ${{ inputs.environmentName }}
-    if: inputs.environment  == 'Development'
+
     steps:
       - name: Print the envName and branch name
         run: echo "${{ inputs.environmentName }} ${{ inputs.branchName }}"
