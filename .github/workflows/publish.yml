@@ -18,9 +18,14 @@ jobs:
     runs-on: ubuntu-latest
     environment:
       name: ${{ inputs.environmentName }}
-    if: ${{ inputs.branchName == 'refs/heads/SW-78--CI/CD-workflow' &&  inputs.environment  == 'Development' }}
     steps:
       - name: Print the envName and branch name
         run: echo "${{ inputs.environmentName }} ${{ inputs.branchName }}"
+
+      - name: Check condition
+        if: ${{ (inputs.branchName == 'refs/heads/SW-78--CI/CD-workflow' &&  inputs.environment  == 'Development') }}
+        run: echo "Expression evaluated to true"
+
+
 
         #TODO: pull image from the registry and run pulumi scripts to deploy on sepcified env
