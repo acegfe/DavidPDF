@@ -33,7 +33,7 @@ jobs:
 
   deploy-stage:
     name: Stage Deployment
-    if: ${{ startsWith(github.ref, 'refs/heads/release/' }}
+    if: ${{ startsWith(github.ref, 'refs/heads/release/') }}
     uses: ./.github/workflows/publish.yml
     with:
       environmentName: "Staging"
@@ -41,7 +41,7 @@ jobs:
   deploy-prod:
     name: Prod Deployment
     needs: deploy-stage
-    if: ${{ startsWith(github.ref, 'refs/heads/release/' }}
+    if: ${{ startsWith(github.ref, 'refs/heads/release/') }}
     uses: ./.github/workflows/publish.yml
     with:
       environmentName: "Production"
