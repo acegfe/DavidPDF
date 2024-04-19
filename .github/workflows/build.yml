@@ -32,6 +32,7 @@ jobs:
       environmentName: "Development"
 
   deploy-stage:
+    needs: build
     name: Stage Deployment
     if: ${{ startsWith(github.ref, 'refs/heads/release/') }}
     uses: ./.github/workflows/publish.yml
