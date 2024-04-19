@@ -23,7 +23,7 @@ jobs:
         run: echo "${{ inputs.environmentName }} ${{ inputs.branchName }}"
 
       - name: Check condition
-        if: ${{ (inputs.branchName == 'refs/heads/SW-78--CI/CD-workflow' &&  inputs.environment  == 'Development') }}
+        if: ${{ inputs.environment  == 'Development' }}
         run: echo "Expression evaluated to true"
 
 
