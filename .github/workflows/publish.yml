@@ -18,14 +18,7 @@ jobs:
     runs-on: ubuntu-latest
     environment:
       name: ${{ inputs.environmentName }}
-    if: |
-      ( 
-      ${{ inputs.branchName }} == 'refs/heads/SW-78--CI/CD-workflow' &&
-      ${{ inputs.environment }} == 'Development') ||
-      (${{ inputs.branchName }} == 'refs/heads/release' &&
-      (${{ inputs.environment }} == 'Staging' ||
-      ${{ inputs.environment }} == 'Production')
-      )
+    if: ( ${{ inputs.branchName }} == 'refs/heads/SW-78--CI/CD-workflow' && ${{ inputs.environment }} == 'Development')
     steps:
       - name: Print the envName and branch name
         run: echo "${{ inputs.environmentName }} ${{ inputs.branchName }}"
