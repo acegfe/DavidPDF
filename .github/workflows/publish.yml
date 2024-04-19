@@ -8,6 +8,10 @@ on:
         description: The environment to deploy to
         required: true
         type: string
+      branchName:
+        type: string
+        description: The branch on which the workflow was triggered
+        required: true
 
 jobs:
   deploy:
@@ -15,9 +19,10 @@ jobs:
     runs-on: ubuntu-latest
     environment:
       name: ${{ inputs.environmentName }}
-
+    if: ( ${{ inputs.branchName }} == 'refs/heads/master' && ${{ inputs.environment }} == 'Development' ) ||
+      ( ${{ inputs.branchName }} == 'refs/heads/release' && (${{ inputs.environment }} == 'Staging' || ${{ inputs.environment }} == 'Production' )
     steps:
-      - name: Print the envName
-        run: echo  ${{ inputs.environmentName }}
+      - name: Print the envName and branch name
+        run: echo "${{ inputs.environmentName }} ${{ inputs.branchName }}"
 
         #TODO: pull image from the registry and run pulumi scripts to deploy on sepcified env
