@@ -9,7 +9,7 @@ on:
   push:
     branches:
       - 'master'
-      - 'SW*'
+      - 'SW-78--CI/CD-workflow'
       - 'releases/**'
       - 'release/**'
 
