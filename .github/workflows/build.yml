@@ -9,7 +9,7 @@ on:
       - 'release/**'
 
 env:
-  BRANCH: ${{ contains(github.ref,'SW') && 'master' || 'release' }}
+  BRANCH: ${{ github.ref == 'refs/heads/SW-78--CI/CD-workflow' &&  'master' || 'release' }}
   IMAGE_NAME: 'pdf_generator'
   VERSION: 'v1.0.0'
 
