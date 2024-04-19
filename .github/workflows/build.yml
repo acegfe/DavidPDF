@@ -1,4 +1,4 @@
-name: Create Docker Image
+name: Build and Push to ACR
 
 env:
   JAVA_VERSION: '21'
@@ -45,6 +45,7 @@ jobs:
         #TODO: push image to the Azure Container Registry
 
   deploy-dev:
+    name: Dev Deployment
     needs: build
     uses: ./.github/workflows/publish.yml
     with:
@@ -52,6 +53,7 @@ jobs:
       branchName: ${{ github.ref }}
 
   deploy-stage:
+    name: Stage Deployment
     needs: deploy-dev
     uses: ./.github/workflows/publish.yml
     with:
@@ -59,6 +61,7 @@ jobs:
       branchName: ${{ github.ref }}
 
   deploy-prod:
+    name: Prod Deployment
     needs: deploy-stage
     uses: ./.github/workflows/publish.yml
     with:
