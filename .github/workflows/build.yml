@@ -1,10 +1,5 @@
 name: Build and Push to ACR
 
-env:
-  JAVA_VERSION: '21'
-  IMAGE_NAME: 'pdf_generator'
-  VERSION: 'v1.0.0'
-
 on:
   push:
     branches:
@@ -12,6 +7,11 @@ on:
       - 'SW-78--CI/CD-workflow'
       - 'releases/**'
       - 'release/**'
+
+env:
+  BRANCH: ${{ contains(github.ref,'SW') && 'master' || 'release' }}
+  IMAGE_NAME: 'pdf_generator'
+  VERSION: 'v1.0.0'
 
 jobs:
   build:
@@ -25,7 +25,7 @@ jobs:
       - name: Set up Java version
         uses: actions/setup-java@v4
         with:
-          java-version: ${{ env.JAVA_VERSION }}
+          java-version: 21
           distribution: 'temurin'
           server-id: github
 
@@ -50,7 +50,7 @@ jobs:
     uses: ./.github/workflows/publish.yml
     with:
       environmentName: "Development"
-      branchName: ${{ github.ref }}
+      branchName: ${{ env.BRANCH }}
 
   deploy-stage:
     name: Stage Deployment
@@ -58,7 +58,7 @@ jobs:
     uses: ./.github/workflows/publish.yml
     with:
       environmentName: "Staging"
-      branchName: ${{ github.ref }}
+      branchName: ${{ env.BRANCH }}
 
   deploy-prod:
     name: Prod Deployment
@@ -66,4 +66,4 @@ jobs:
     uses: ./.github/workflows/publish.yml
     with:
       environmentName: "Production"
-      branchName: ${{ github.ref }}
+      branchName: ${{ env.BRANCH }}
