@@ -1,4 +1,9 @@
-name: Build and Push to ACR
+name: Create Docker Image
+
+env:
+  JAVA_VERSION: '21'
+  IMAGE_NAME: 'pdf_generator'
+  VERSION: 'v1.0.0'
 
 on:
   push:
@@ -8,41 +13,74 @@ on:
       - 'releases/**'
       - 'release/**'
 
-env:
-  IMAGE_NAME: 'pdf_generator'
-  VERSION: 'v1.0.0'
-
 jobs:
   build:
     name: Build and push docker image
     runs-on: ubuntu-latest
-    
+
     steps:
-      - name: Print
-        run: echo "You are in Build phase"
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Set up Java version
+        uses: actions/setup-java@v4
+        with:
+          java-version: ${{ env.JAVA_VERSION }}
+          distribution: 'temurin'
+          server-id: github
+
+      - name: Build JAR with Maven
+        env:
+          APIKEY: ${{ secrets.API_KEY }}
+        run: mvn clean package
+
+      - name: Cache SonarQube packages
+        uses: actions/cache@v1
+        with:
+          path: ~/.sonar/cache
+          key: ${{ runner.os }}-sonar
+          restore-keys: ${{ runner.os }}-sonar
+
+      - name: Cache Maven packages
+        uses: actions/cache@v1
+        with:
+          path: ~/.m2
+          key: ${{ runner.os }}-m2-${{ hashFiles('**/pom.xml') }}
+          restore-keys: ${{ runner.os }}-m2
+
+      - name: Build and analyze
+        env:
+          SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
+          SONAR_HOST_URL: ${{ secrets.SONAR_HOST_URL }}
+        run: mvn -B verify org.sonarsource.scanner.maven:sonar-maven-plugin:sonar -Dsonar.projectKey=PdfGenerator -Dsonar.projectName='PdfGenerator'
+
+      - name: Build image with docker
+        uses: docker/build-push-action@v5
+        with:
+          context: .
+          file: ./src/infra/Dockerfile
+          push: false
+          tags: ${{ env.IMAGE_NAME }}:${{ github.sha }}
 
         #TODO: push image to the Azure Container Registry
 
   deploy-dev:
-    name: Dev Deployment
     needs: build
-    if: github.ref == 'refs/heads/SW-78--CI/CD-workflow'
     uses: ./.github/workflows/publish.yml
     with:
       environmentName: "Development"
+      branchName: ${{ github.ref }}
 
   deploy-stage:
-    needs: build
-    name: Stage Deployment
-    if: ${{ startsWith(github.ref, 'refs/heads/release/') }}
+    needs: deploy-dev
     uses: ./.github/workflows/publish.yml
     with:
       environmentName: "Staging"
+      branchName: ${{ github.ref }}
 
   deploy-prod:
-    name: Prod Deployment
     needs: deploy-stage
-    if: ${{ startsWith(github.ref, 'refs/heads/release/') }}
     uses: ./.github/workflows/publish.yml
     with:
       environmentName: "Production"
+      branchName: ${{ github.ref }}
