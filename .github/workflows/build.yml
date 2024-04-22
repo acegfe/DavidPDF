@@ -66,21 +66,22 @@ jobs:
 
   deploy-dev:
     needs: build
+    if: github.ref == 'refs/heads/SW-78--CI/CD-workflow'
     uses: ./.github/workflows/publish.yml
     with:
       environmentName: "Development"
-      branchName: ${{ github.ref }}
 
   deploy-stage:
-    needs: deploy-dev
+    needs: build
+    if: ${{ startsWith(github.ref, 'refs/heads/release/') }}
     uses: ./.github/workflows/publish.yml
     with:
       environmentName: "Staging"
-      branchName: ${{ github.ref }}
 
   deploy-prod:
     needs: deploy-stage
+    if: ${{ startsWith(github.ref, 'refs/heads/release/') }}
     uses: ./.github/workflows/publish.yml
     with:
       environmentName: "Production"
-      branchName: ${{ github.ref }}
+
