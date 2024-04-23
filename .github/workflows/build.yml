@@ -21,6 +21,8 @@ jobs:
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
 
       - name: Set up Java version
         uses: actions/setup-java@v4
@@ -50,6 +52,7 @@ jobs:
 
       - name: Build and analyze
         env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
           SONAR_HOST_URL: ${{ secrets.SONAR_HOST_URL }}
           APIKEY: ${{ secrets.API_KEY }}
@@ -76,6 +79,7 @@ jobs:
     needs: build
     if: ${{ startsWith(github.ref, 'refs/heads/release/') }}
     uses: ./.github/workflows/publish.yml
+
     with:
       environmentName: "Staging"
 
